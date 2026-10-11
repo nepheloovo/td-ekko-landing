@@ -61,9 +61,18 @@ npm run build && npm run preview   # 预览生产产物
 | Vercel | ✅ | Deployment Protection（密码 / Vercel 账号门禁） |
 | Netlify | ✅ | Password protection（付费档） |
 
-### 关于素材与公开仓库
+### 关于素材与公开仓库（本仓库的实际选择）
 
-`public/assets/` 里是 Riot 的 GLB 模型、原画与游戏贴图（约 13 MB）。**把它们推进公开仓库 = 二次分发 Riot 素材**，与文末许可一节冲突；私有仓库则只是本地留存，没有这个问题。如果要公开发布，建议走上面的「替换素材」路线（用生成图/占位图替换 Riot 资产）而不是直接推。
+**本仓库选择公开，且保留 Riot 素材**（`public/assets/` 下约 13 MB 的 GLB 模型、原画与游戏贴图），因此可以走完整的 GitHub Pages 路线。
+
+需要明确记录的后果：**把 Riot 的模型 / 原画 / 贴图放进公开仓库属于二次分发**。粉丝非商用页面通常无人追究，但存在收到 DMCA 或下架通知的可能。已具备的缓解措施：页内无官方 logo、页脚写明非官方非商用、不提供任何下载入口。
+
+若要降低暴露面（任选其一，都不需要改代码）：
+
+- 把仓库转回 **private**（本地一切不受影响），改用「路线 B」的 Cloudflare Pages + Access；
+- 或在 `index.html` 加 `<meta name="robots" content="noindex" />`，让搜索引擎不收录。
+
+若将来要公开发布**站点本身**（而不只是代码），应把 `public/assets/` 换成生成图 / 授权素材，此时 3D hero 需改为占位几何体或加载外部授权模型。
 
 ---
 
