@@ -136,6 +136,7 @@ WebGLBackdrop → LoaderScreen → HeaderMarquee → Navigation → HeroHeadline
 | 字体 | RL-Unno / Domaine Display Condensed / Founders Grotesk（试用） | Bodoni Moda + Noto Serif SC + Bebas Neue + Inter + Rajdhani + Space Mono | 全部 Google Fonts 实测 200，含中文字符集覆盖 |
 | **字号微调（已记录）** | `.huge-text` 恒定 16vw | ≥1440px 降为 **13.5vw** | 源站 4 行 × 16vw 在 900px 高视口下放不下（源站自己也把末行切在折叠线下）；为保证整段字标首屏可读而下调 |
 | 卡片标题字号 | 90px / `lh .8` | **3.4rem / `lh 1.02`** | 源站那套是给长拉丁标题调的；中文在 `.8` leading 下会字形相撞（实测 h 由 69 → 54 才暴露问题） |
+| **卡片图片画幅** | 5:6 竖幅（`image-proportion.short`，`padding-bottom:120%`） | **跟随原画比例（1.695 横幅，`--frame-ar` 驱动）** | 源站的 5:6 是给它自己的竖构图项目图用的；Riot 原画是 1215×717 横幅，5:6 只能看到 **49% 宽度**，居中裁切正好把 Breakout 的人脸和电剑切掉（卡 1/卡 3 同样被裁，只是不明显）。改成比例一致后 `object-fit:cover` **零裁切**，人物整体可见。同时图片列从 `col-md-6` 加宽到 `col-md-8` |
 | 数据大字 | `.display-1` 18vw | 拉丁行降到 **5.5vw** | `TRUE DAMAGE` 11 字符 × 18vw = 2850px，必然折行溢出 |
 
 ---
@@ -145,7 +146,7 @@ WebGLBackdrop → LoaderScreen → HeaderMarquee → Navigation → HeroHeadline
 1. **GLB 无骨骼/无动画**：工具包已实测确认 CDragon 不托管 `.skl` / `.anm`，静态网格是这条路的上限。要动画需本地客户端 `Ekko.wad.client` + `lol2gltf`。
 2. **官方中文技能名待核**：`Z 型驱动共振 / 时间卷曲器 / 平行收敛 / 相位俯冲 / 时空断裂` 按官方本地化写法录入，页面上也标了英文原名作为权威对照；公开发布前建议对客户端核一遍。技能描述文案是自写概念句，非 Riot tooltip 原文。
 3. **`three.js` 未做代码分割**：主 chunk 890 KB（gzip 261 KB）。做法：`manualChunks` 把 `three` 拆出来 + 3D 区块 `React.lazy`。
-4. **Arcane 原画缺图**：工作区里 `splash_57.jpg` 只有 13 KB 且**文件截断无法解码**（脚本已容错跳过），因此第三张卡改用工具包 `render_glb.py` 渲染的 GLB 预览图。
+4. ~~Arcane 原画缺图~~ **已解决**：工作区里 `splash_57.jpg` 只有 13 KB 且文件截断无法解码（背景合成脚本已容错跳过），已改为按工具包同一 URL 规则从 CommunityDragon 重新拉取 `ekko_splash_uncentered_57.jpg`（1215×717，HTTP 200 已解码校验），三张卡现在用的是同一套真实原画。
 
 ---
 
@@ -154,8 +155,8 @@ WebGLBackdrop → LoaderScreen → HeaderMarquee → Navigation → HeroHeadline
 | 素材 | 来源 |
 |---|---|
 | `public/assets/ekko-*.glb` | 工作区 `ekko-truedamage/glb/`，由 `fetch_skin.py` + `lolmesh.py` 从 CommunityDragon 镜像的 Riot 随包资源提取、经 `validate_glb.py` 校验 |
-| `splash-td.jpg` / `splash-breakout.jpg` | 同上工具包 `ref/`（LoL Wiki 原画） |
-| `card-*.png` | 工具包 `render_glb.py` 自渲染的 GLB 预览 |
+| `splash-td.jpg` / `splash-breakout.jpg` | 同上工具包 `ref/`（LoL Wiki 原画，即 CDragon 的 `ekko_splash_uncentered_19/56.jpg`）|
+| `splash-arcane.jpg` | CommunityDragon `…/ekko/skins/skin57/images/ekko_splash_uncentered_57.jpg`（本地那份是截断文件，已重新拉取）|
 | `tex/*.png` | 同上工具包 `raw/`（游戏内 `_tx_cm` 贴图） |
 | `bg-lower/upper.webp` | 由 `scripts/build_backdrop.py` 用上述素材合成 |
 

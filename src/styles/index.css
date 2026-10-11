@@ -414,7 +414,10 @@ body.reel-open {
 @media (min-width: 768px) { .skin-card { padding: 0.5rem; } }
 .skin-card .sheet { position: absolute; inset: 0; background: #fff; }
 .image-proportion { position: relative; }
-.image-proportion::before { content: ''; display: block; }
+/* The frame height comes from --frame-ar (per-asset, set from the real image
+   dimensions) so landscape splash art is never cropped. `.short` (120%, the
+   source site's portrait card) is kept for genuinely portrait art only. */
+.image-proportion::before { content: ''; display: block; padding-bottom: var(--frame-ar, 120%); }
 .image-proportion.short::before { padding-bottom: 120%; }
 .skin-card img.art { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; }
 .index-container { margin-top: -0.35em; }
@@ -441,7 +444,7 @@ body.reel-open {
   font-family: 'Space Mono', monospace; font-size: 12px; text-transform: uppercase; padding: 0.3em 0.8em; transition: 0.3s;
 }
 .card-pick:hover, .card-pick.is-active { background: #000; color: #fff; }
-.card-art-tint { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(238, 97, 255, 0.16), rgba(8, 6, 15, 0.42)); }
+.card-art-tint { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(238, 97, 255, 0.05), rgba(8, 6, 15, 0.16)); }
 
 /* ================================ AWARDS/STATS =========================== */
 .stats .headline-wrapper { margin-top: -0.2em; display: flex; align-items: center; }

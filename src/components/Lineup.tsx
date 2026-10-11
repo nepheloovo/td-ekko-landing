@@ -1,3 +1,4 @@
+import type React from 'react';
 import { SKINS } from '../data';
 import { Starburst } from './Starburst';
 
@@ -41,14 +42,17 @@ export function Lineup({ activeGlb, onPick }: Props) {
               <div id={`case-${skin.id}`} className="skin-card row position-relative">
                 <div className="sheet" style={{ opacity: 0.9679 }} />
 
-                <div className="col-8 col-md-6 w-100 project-image">
-                  <div className="w-100 image-proportion short position-relative">
+                <div className="col-12 col-md-8 w-100 project-image">
+                  <div
+                    className="w-100 image-proportion position-relative"
+                    style={{ '--frame-ar': `${(100 / skin.aspect).toFixed(2)}%` } as React.CSSProperties}
+                  >
                     <img className="art" loading="lazy" alt={`${skin.cn} ${skin.en}`} src={skin.art} />
                     <div className="card-art-tint" />
                   </div>
                 </div>
 
-                <div className="col-4 col-md-6 d-flex align-items-start justify-content-end index-container">
+                <div className="col-12 col-md-4 d-flex align-items-start justify-content-end index-container">
                   <h3 className="d-flex align-items-end index lh-08 font-A" style={{ margin: 0 }}>{i + 1}</h3>
                 </div>
 

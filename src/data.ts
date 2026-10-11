@@ -20,6 +20,11 @@ export type Skin = {
   tris: string;
   textures: number;
   art: string;
+  /** Real width/height of `art`, measured from the file. The card frame is set
+   *  from this so `object-fit: cover` performs NO crop — Riot splash art is
+   *  1215x717 (1.695), while the source site's card used a 5:6 portrait frame
+   *  that only showed 49% of a landscape image (which cut the character in half). */
+  aspect: number;
   glb: string;
   note: string;
 };
@@ -35,6 +40,7 @@ export const SKINS: Skin[] = [
     tris: '12,820',
     textures: 2,
     art: asset('assets/splash-td.jpg'),
+    aspect: 1215 / 717,
     glb: asset('assets/ekko-td.glb'),
     note: '本页主推。霓虹紫与青的主色即取自这张原画。',
   },
@@ -47,6 +53,7 @@ export const SKINS: Skin[] = [
     tris: '15,398',
     textures: 5,
     art: asset('assets/splash-breakout.jpg'),
+    aspect: 1215 / 717,
     glb: asset('assets/ekko-breakout.glb'),
     note: '原版的变体皮肤，部件与贴图数量都更多。',
   },
@@ -58,7 +65,10 @@ export const SKINS: Skin[] = [
     meshes: 8,
     tris: '25,900',
     textures: 4,
-    art: asset('assets/card-arcane.png'),
+    // was a 1560x760 GLB three-view render on white; replaced with the real
+    // Arcane Last Stand splash (the toolkit's local splash_57.jpg was truncated).
+    art: asset('assets/splash-arcane.jpg'),
+    aspect: 1215 / 717,
     glb: asset('assets/ekko-arcane.glb'),
     note: '最新一款艾克皮肤，也是本工作区里精度最高的网格。',
   },
