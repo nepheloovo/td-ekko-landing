@@ -1,0 +1,505 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ============================================================================
+   True Damage Ekko — concept landing page
+   Design system transplanted from the reverse-engineered synchronized.studio
+   system: black/violet field, single neon accent, clip-path sliced display
+   stack, drawing cursor, marquee, distorted links, loader.
+   Palette sampled from ref/splash_19.jpg (see DESIGN-SPEC.md).
+   ========================================================================= */
+
+:root {
+  --field: #08060f;
+  --field-2: #130a20;
+  --violet-deep: #2a1b4a;
+  --violet-mid: #5b3a9e;
+  --magenta: #ee61ff;
+  --pink: #fb58fc;
+  --cyan: #5bd6ff;
+  --gold: #ea981a;
+  --hot: #fbfff1;
+  --ash: #919191;
+}
+
+/* ---------- base (source values verbatim, colours swapped) --------------- */
+html {
+  font-family: sans-serif;
+  line-height: 1.15;
+  -webkit-text-size-adjust: 100%;
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+  color: #000;
+  letter-spacing: normal;
+  font-size: 16px;
+  overflow: hidden;
+}
+@media (min-width: 1200px) {
+  html {
+    font-size: 20px;
+  }
+}
+body {
+  margin: 0;
+  font-family: Inter, 'Noto Sans SC', system-ui, sans-serif;
+  font-size: 1rem;
+  font-weight: 400;
+  line-height: 1.5;
+  color: #212529;
+  text-align: left;
+  background-color: var(--field);
+  overflow: visible;
+}
+body.reel-open {
+  overflow: hidden;
+}
+::selection {
+  background: var(--magenta);
+  color: #08060f;
+}
+* {
+  box-sizing: border-box;
+}
+
+/* ---------- Bootstrap-4-compatible subset --------------------------------
+   The source grid IS Bootstrap. Tailwind's `.container` is deliberately
+   disabled in tailwind.config.js; these classes carry the exact source values
+   so the transplanted layout math (5/7 splits, -1.1em indents, -.35em index
+   pull) stays correct.                                                      */
+.container {
+  width: 100%;
+  padding-right: 15px;
+  padding-left: 15px;
+  margin-right: auto;
+  margin-left: auto;
+}
+@media (min-width: 576px) { .container { max-width: 540px; } }
+@media (min-width: 768px) { .container { max-width: 720px; } }
+@media (min-width: 992px) { .container { max-width: 960px; } }
+@media (min-width: 1200px) { .container { max-width: 1000px; } }
+@media (min-width: 1500px) { .container { max-width: 1360px; } }
+
+.row { display: flex; flex-wrap: wrap; margin-right: -15px; margin-left: -15px; }
+.col-4, .col-8, .col-sm-7, .col-md-4, .col-md-5, .col-md-6, .col-md-8, .col-11, .col-xl-8 {
+  position: relative; width: 100%; padding-right: 15px; padding-left: 15px;
+}
+.col-4 { flex: 0 0 33.33333%; max-width: 33.33333%; }
+.col-8 { flex: 0 0 66.66667%; max-width: 66.66667%; }
+.col-11 { flex: 0 0 91.66667%; max-width: 91.66667%; }
+@media (min-width: 576px) { .col-sm-7 { flex: 0 0 58.33333%; max-width: 58.33333%; } }
+@media (min-width: 768px) {
+  .col-md-4 { flex: 0 0 33.33333%; max-width: 33.33333%; }
+  .col-md-5 { flex: 0 0 41.66667%; max-width: 41.66667%; }
+  .col-md-6 { flex: 0 0 50%; max-width: 50%; }
+  .col-md-8 { flex: 0 0 66.66667%; max-width: 66.66667%; }
+}
+@media (min-width: 1200px) { .col-xl-8 { flex: 0 0 66.66667%; max-width: 66.66667%; } }
+.offset-md-3 { }
+@media (min-width: 768px) { .offset-md-3 { margin-left: 25%; } }
+
+/* display / flex helpers used by the transplanted markup */
+.d-flex { display: flex; }
+.d-inline-block { display: inline-block; }
+.d-block { display: block; }
+.d-none { display: none; }
+.flex-column { flex-direction: column; }
+.flex-column-reverse { flex-direction: column-reverse; }
+.flex-row { flex-direction: row; }
+.flex-grow { flex-grow: 1; }
+.align-items-center { align-items: center; }
+.align-items-start { align-items: flex-start; }
+.align-items-end { align-items: flex-end; }
+.align-self-center { align-self: center; }
+.justify-content-center { justify-content: center; }
+.justify-content-between { justify-content: space-between; }
+.justify-content-end { justify-content: flex-end; }
+.position-relative { position: relative; }
+.position-absolute { position: absolute; }
+.position-fixed { position: fixed; }
+.w-100 { width: 100%; }
+.h-100 { height: 100%; }
+.t-0 { top: 0; }
+.t-50 { top: 50%; }
+.t-100 { top: 100%; }
+.l-0 { left: 0; }
+.r-0 { right: 0; }
+.no-wrap { white-space: nowrap; }
+@media (min-width: 768px) {
+  .d-md-flex { display: flex; }
+  .d-md-block { display: block; }
+  .d-md-none { display: none; }
+  .flex-md-row { flex-direction: row; }
+  .justify-content-md-between { justify-content: space-between; }
+  .justify-content-md-start { justify-content: flex-start; }
+  .align-items-md-start { align-items: flex-start; }
+  .pl-md-0 { padding-left: 0 !important; }
+  .pr-md-0 { padding-right: 0 !important; }
+  .pb-md-0 { padding-bottom: 0 !important; }
+  .pb-md-5 { padding-bottom: 8rem !important; }
+  .pt-md-0 { padding-top: 0 !important; }
+  .mt-md-0 { margin-top: 0 !important; }
+  .mt-md-4 { margin-top: 5rem !important; }
+  .mb-md-3 { margin-bottom: 3.5rem !important; }
+  .mr-md-0 { margin-right: 0 !important; }
+}
+@media (min-width: 992px) {
+  .d-lg-inline-block { display: inline-block; }
+  .d-lg-flex { display: flex; }
+}
+@media (min-width: 1200px) { .mt-xl-5 { margin-top: 8rem !important; } }
+
+/* ---------- type scale (source values verbatim) --------------------------- */
+.h1, .h3, .h4, .h5, .h6, h1, h2, h3, h4, h5, h6 {
+  margin: 0; padding: 0; font-family: Inter, 'Noto Sans SC', serif;
+  font-weight: 400; line-height: 1.1;
+}
+.h1, h1 { font-size: 5.5rem; }
+.h2, h2 { font-size: 4.5rem; }
+.h3, h3 { font-size: 2.2rem; }
+.h5, h5 { font-size: 0.8rem; }
+.h6, h6 { font-size: 0.76rem; }
+.display-1 { font-size: 18vw; }
+@media (max-width: 991.98px) { .display-1 { font-size: 20vw; } }
+.display-1, .display-4 { font-weight: 700; line-height: 1.1; }
+.display-4 { font-size: 3.8rem; }
+.huge-text { font-size: 20vw; }
+@media (min-width: 768px) { .huge-text { font-size: 16vw; } }
+/* Fit deviation (documented in README): the source stack is 4 rows x 16vw, which
+   cannot fit a 900px-tall viewport once the nav + marquee are accounted for.
+   Above 1440px we step the stack down so the whole wordmark reads on load. */
+@media (min-width: 1440px) { .huge-text { font-size: 13.5vw; } }
+.big-text { font-size: 16vw; line-height: 1.1; }
+@media (min-width: 768px) { .big-text { font-size: 12vw; } }
+.tiny { font-size: 0.55rem; }
+@media (max-width: 767.98px) { .tiny { font-size: 1.1rem; } }
+.uppercase { text-transform: uppercase; }
+.lh-08 { line-height: 0.8 !important; }
+.lh-1 { line-height: 1 !important; }
+.lh-12 { line-height: 1.2 !important; }
+.lh-14 { line-height: 1.4 !important; }
+.font-A { font-family: 'Bodoni Moda', 'Noto Serif SC', serif; }
+.font-B { font-family: 'Bebas Neue', 'Noto Sans SC', sans-serif; }
+.font-C { font-family: Inter, 'Noto Sans SC', system-ui, sans-serif; }
+.font-E { font-family: Rajdhani, 'Noto Sans SC', sans-serif !important; }
+.font-M { font-family: 'Space Mono', monospace; }
+.font-B.bold, .bold { font-weight: 900; }
+.thin-font { font-weight: 300; }
+.color-white { color: #fff; }
+.color-hot { color: var(--hot); }
+.color-magenta { color: var(--magenta); }
+.color-cyan { color: var(--cyan); }
+.color-gold { color: var(--gold); }
+.color-ash { color: var(--ash); }
+.color-grey { color: var(--ash); }
+.trans-white { color: hsla(0, 0%, 100%, 0.8); font-size: 0.9vw; }
+.center { top: 50%; left: 50%; transform: translate(-50%, -50%); }
+.center-x { left: 50%; transform: translateX(-50%); }
+.center-y { top: 50%; transform: translateY(-50%); }
+.minus-margin { margin-top: -0.3em; z-index: 2; position: relative; }
+.enabled { pointer-events: auto !important; }
+.no-events { pointer-events: none; }
+.should-animate { opacity: 0; }
+.indented { margin-left: -1.1em; }
+.text-center { text-align: center; }
+
+/* ---------- underline / hairline contracts -------------------------------- */
+.link { position: relative; }
+.link::after {
+  content: ''; left: 0; width: 100%; opacity: 1; position: absolute; bottom: 0.1em;
+  height: 1px; transition: 0.4s; background-color: currentColor;
+}
+.link.magenta::after { background: var(--magenta); }
+.link.cyan::after { background: var(--cyan); }
+.link.grey::after { background: var(--ash); }
+.link.white::after { background: #fff; }
+.link:hover { color: var(--magenta) !important; }
+
+/* ---------- marquee (source keyframes verbatim) --------------------------- */
+.marquee-wrapper { overflow: hidden; white-space: nowrap; }
+.marquee-1, .marquee-2 { display: inline-block; will-change: transform; }
+.animating .marquee-1 { animation: marquee 30s linear infinite; animation-delay: -15s; }
+.animating .marquee-2 { animation: marquee2 30s linear infinite; animation-delay: 0s; }
+@keyframes marquee  { 0% { transform: translateX(-100%); } to { transform: translateX(100%); } }
+@keyframes marquee2 { 0% { transform: translateX(-200%); } to { transform: translateX(0); } }
+
+/* ---------- rotating sun / starburst -------------------------------------- */
+@keyframes rotating { 0% { transform: rotate(0deg); } to { transform: rotate(1turn); } }
+.rotating { animation: rotating 10s linear infinite; }
+
+/* ---------- scroll reveal (should-animate + data-preset) ------------------ */
+.waypoint { position: relative; }
+
+/* ---------- gradients (source strings, recoloured stops) ------------------ */
+.gradient-top {
+  position: absolute; width: 100%; height: 80vmin; top: -80vmin; left: 0;
+  background: linear-gradient(0deg, transparent, var(--field) 40%, var(--field) 60%, transparent);
+}
+.gradient-bottom {
+  position: absolute; width: 100%; height: 20vw; bottom: -6vw; left: 0;
+  background: linear-gradient(0deg, var(--field) 40%, transparent);
+}
+.gradient-veil {
+  position: absolute; width: 100%; height: 30vw; top: -1vw; left: 0;
+  background: linear-gradient(180deg, var(--field) 40%, transparent);
+}
+.gradient-foot {
+  position: absolute; width: 100%; height: 50vw; bottom: 0; left: 0;
+  background: linear-gradient(180deg, transparent, var(--field));
+}
+
+/* ============================ BACKGROUND STAGE ============================ */
+.background-stage { position: fixed; inset: 0; height: 100vh; background: var(--field); z-index: 0; }
+.background-stage canvas { width: 100vw; height: 100vh; display: block; }
+.backdrop-grade {
+  position: fixed; inset: 0; z-index: 1; pointer-events: none;
+  background:
+    radial-gradient(60vw 60vh at 70% 22%, rgba(238, 97, 255, 0.09), transparent 62%),
+    radial-gradient(52vw 46vh at 22% 76%, rgba(91, 214, 255, 0.07), transparent 66%),
+    radial-gradient(115vw 115vh at 50% 45%, transparent 30%, rgba(8, 6, 15, 0.9) 100%);
+  mix-blend-mode: screen;
+}
+.backdrop-grain {
+  position: fixed; inset: 0; z-index: 2; pointer-events: none; opacity: 0.06;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3'/></filter><rect width='180' height='180' filter='url(%23n)'/></svg>");
+}
+
+/* ================================ TRACING ================================= */
+.tracing-layer { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 120; pointer-events: none; }
+
+/* ================================= LOADER ================================= */
+.loader {
+  position: fixed; inset: 0; z-index: 99999999; display: flex; flex-direction: column;
+  justify-content: space-between; color: #fff; background: var(--field);
+}
+.loader-padding { padding: 0.6rem 1.6rem; }
+.loader h2 { font-size: 5.2vw; font-family: 'Bodoni Moda', 'Noto Serif SC', serif; margin: 0; }
+.display-progress-wrapper { position: absolute; left: 85vw; }
+.loader-bar { position: absolute; left: 0; bottom: 0; height: 2px; background: var(--magenta); }
+
+/* ============================== NAVIGATION =============================== */
+.navigation { position: fixed; top: 0; right: 0; color: #fff; width: 100%; z-index: 100000; transition: 0.4s; pointer-events: none; }
+.nav-bar { position: relative; z-index: 100; display: flex; align-items: center; justify-content: space-between; width: 100%; transition: all 0.65s, background 0.3s; }
+.nav-item { transition: color 0.3s; }
+.nav-item:hover { color: var(--magenta) !important; }
+.move-down { top: 0.1em; position: relative; }
+.nav-mark { display: flex; flex-direction: column; line-height: 1; }
+.archive-icon { width: 0.62em; height: 0.62em; margin-left: 0.2em; margin-top: -0.15em; }
+
+/* =============================== MARQUEE TOP ============================== */
+.header-marquee { padding-top: 0.2em; }
+.marquee-span { margin-right: 0.4em; }
+
+/* ================================ HERO =================================== */
+.page-header { width: 100vw; position: relative; -webkit-text-size-adjust: auto; padding-top: 5rem; }
+.big-headline { position: relative; font-family: 'Bodoni Moda', 'Noto Serif SC', serif; opacity: 0.75; backface-visibility: hidden; }
+.big-headline .lines { position: absolute; width: 100%; height: 100%; top: 0; left: 0; opacity: 0.52; }
+.big-headline .lines .line { position: absolute; width: 1px; background: var(--ash); height: 77vw; }
+@media (min-width: 768px) { .big-headline .lines .line { height: 80%; } }
+
+.text-part { position: absolute; top: 0; left: 0; width: 100%; }
+.text-part.part-1 { position: relative; clip-path: polygon(0 0, 24.5% 0, 29.8% 100%, 0 100%); }
+.text-part.part-2 { clip-path: polygon(24.5% 0, 29.7% 0, 36.7% 100%, 29.7% 100%); }
+.text-part.part-3 { clip-path: polygon(29.7% 0, 72.8% 0, 63% 100%, 36.6% 100%); }
+.text-part.part-4 { clip-path: polygon(100% 0, 72.8% 0, 63% 100%, 100% 100%); }
+@media (min-width: 768px) {
+  .text-part.part-1 { clip-path: polygon(0 0, 20.5% 0, 29.8% 100%, 0 100%); }
+  .text-part.part-2 { clip-path: polygon(20.49% 0, 38.7% 0, 45.7% 100%, 29.7% 100%); }
+  .text-part.part-3 { clip-path: polygon(38.7% 0, 72.8% 0, 63% 100%, 45.6% 100%); }
+  .text-part.part-4 { clip-path: polygon(100% 0, 72.8% 0, 63% 100%, 100% 100%); }
+}
+.inner-text { position: relative; line-height: 1; }
+.text-row-1 { left: -2%; text-align: right; }
+.text-row-2 { left: 6%; }
+.text-row-3 { padding-left: 1.4em; }
+.text-row-4 { padding-left: 2.5em; }
+@media (min-width: 768px) {
+  .text-row-1 { left: 0; padding-left: 1.05em; text-align: left; }
+  .text-row-2 { left: 0; }
+  .text-row-3 { padding-left: 1.75em; }
+}
+.part-2 .text-row-2 { top: -0.1em; }
+.part-2 .text-row-3 { top: 0; }
+.part-3 .text-row-1 { top: 0.1em; }
+.part-3 .text-row-4 { top: -0.3em; }
+.part-4 .text-row-1 { top: 0.2em; }
+.part-4 .text-row-3 { top: -0.15em; }
+.part-4 .text-row-4 { top: -0.35em; }
+@media (min-width: 768px) {
+  .part-2 .text-row-3 { top: -0.3em; }
+  .part-3 .text-row-3 { top: -0.2em; }
+}
+/* Mobile: the source's 20vw rows plus the 1.4em / 2.5em cascade indents overflow
+   a phone viewport (verified at 390x844: DAMAGE clipped). Step the size down and
+   flatten the indent ladder below md. */
+@media (max-width: 767.98px) {
+  .huge-text { font-size: 15vw; }
+  .text-row-1 { left: 0; padding-left: 0.15em; text-align: left; }
+  .text-row-2 { left: 0; }
+  .text-row-3 { padding-left: 0.5em; }
+  .text-row-4 { padding-left: 0.85em; }
+}
+/* per-row colour so the sliced bands read as light refracting through glass */
+.row-cjk {
+  color: var(--hot);
+  font-family: 'Noto Serif SC', 'Bodoni Moda', serif;
+  font-weight: 900;
+  /* CJK glyphs fill the em box, so they read ~25% larger than a Latin cap-height
+     stack at the same font-size. 0.8em optically matches the Latin rows. */
+  font-size: 0.8em;
+}
+.row-1 { color: #fff; }
+.row-2 { color: #f0dcff; }
+.row-3 { color: #d9b8ff; }
+.row-4 { color: #b993ff; }
+
+.content-box { position: relative; }
+@media (min-width: 768px) {
+  .big-headline .content-box { position: absolute; width: 23%; top: 29%; left: 43%; }
+}
+@media (min-width: 1200px) {
+  /* The source put this at 43%/29% (15% wide) because its Latin word stack left a
+     gap there. Measured on our stack (rows cascade 0 / 340 / 486px indent and
+     DAMAGE spans x340..1200 at y450..644) the only clean region is the top-right,
+     so the column moves there rather than colliding with the type. */
+  .big-headline .content-box { width: 20%; left: 67%; top: 1%; }
+}
+.content-box p { font-size: 0.84rem; }
+.watch-top { border-bottom: 1px solid hsla(0, 0%, 100%, 0.5); padding: 5px 0; white-space: nowrap; }
+.watch-top span { margin: 0 0.4rem; }
+
+/* =============================== 3D STAGE ================================ */
+.ekko-stage { position: relative; width: 100%; height: 88vh; min-height: 420px; }
+.ekko-stage canvas { display: block; width: 100%; height: 100%; touch-action: none; }
+.stage-hud {
+  position: absolute; inset: auto 0 0 0; display: flex; justify-content: space-between;
+  align-items: flex-end; padding: 1rem 1.6rem; pointer-events: none;
+}
+.stage-chip {
+  pointer-events: auto; font-family: 'Space Mono', monospace; font-size: 11px; letter-spacing: 0.06em;
+  border: 1px solid rgba(255, 255, 255, 0.22); padding: 0.35em 0.7em; color: #fff;
+  background: rgba(8, 6, 15, 0.55); backdrop-filter: blur(6px); cursor: pointer; transition: 0.3s;
+}
+.stage-chip:hover { border-color: var(--magenta); color: var(--magenta); }
+.stage-chip.is-on { border-color: var(--cyan); color: var(--cyan); }
+
+/* ============================== ABILITIES ================================ */
+.abilities { z-index: 200; }
+.ability-row {
+  display: flex; align-items: baseline; gap: 0.6em; justify-content: center;
+  font-family: 'Bebas Neue', 'Noto Sans SC', sans-serif; font-size: 2.2rem; text-transform: uppercase;
+  line-height: 1.1; color: #fff; padding: 0.06em 0; transition: color 0.35s, transform 0.35s;
+}
+.ability-row:hover { color: var(--magenta); transform: translateX(0.08em); }
+.ability-row i { font-style: italic; color: #cbb6ff; }
+.ability-row b { font-weight: 900; color: var(--gold); position: relative; }
+.ability-row b::after {
+  content: ''; position: absolute; top: 100%; left: 0; width: 100%; height: 1px;
+  background-color: currentColor; opacity: 0.5;
+}
+.ability-key { font-family: 'Space Mono', monospace; font-size: 0.72rem; color: var(--cyan); letter-spacing: 0.1em; }
+.services .line { height: 7vw; width: 2px; }
+.services .line::after {
+  transform: rotate(15deg); background: hsla(0, 0%, 100%, 0.5); display: block;
+  content: ''; width: 100%; height: 100%;
+}
+.circle-text { position: absolute; top: 50%; left: 50%; width: 150%; opacity: 0.4; transform: translate(-50%, -55%); }
+
+/* ================================ CARDS ================================= */
+.cases-listing { width: 100%; }
+.skin-card-outer { cursor: pointer; margin-bottom: 1rem; }
+@media only screen and (min-width: 992px) { .skin-card-outer { max-width: 50%; } }
+@media only screen and (min-width: 1200px) { .skin-card-outer { max-width: 580px; } }
+.skin-card { background: #000; color: #000; padding: 1rem; position: relative; }
+@media (min-width: 768px) { .skin-card { padding: 0.5rem; } }
+.skin-card .sheet { position: absolute; inset: 0; background: #fff; }
+.image-proportion { position: relative; }
+.image-proportion::before { content: ''; display: block; }
+.image-proportion.short::before { padding-bottom: 120%; }
+.skin-card img.art { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; }
+.index-container { margin-top: -0.35em; }
+.skin-card h2.headline {
+  font-family: 'Bodoni Moda', 'Noto Serif SC', serif;
+  /* source value was 90px / lh 0.8, tuned for long Latin titles like
+     "Canary Islands x Expedia". CJK glyphs collide at that leading, so we keep
+     the display weight but step to 3.4rem / lh 1 so 7-glyph titles wrap cleanly. */
+  font-size: 3.4rem;
+  line-height: 1.02;
+  margin: 1rem 0 1.2rem;
+  font-weight: 900;
+}
+.skin-card .meta { margin-bottom: 0.6rem !important; text-align: center; }
+/* the source card centred its title + copy inside the text column */
+.skin-card h2.headline { text-align: center; }
+.skin-card p.content { text-align: center; margin-left: auto; margin-right: auto; }
+.skin-card h3.index { font-family: 'Bodoni Moda', 'Noto Serif SC', serif; font-size: 44px; line-height: 0.8; }
+.skin-card p.content { font-family: Inter, 'Noto Sans SC', sans-serif; font-size: 0.72rem; line-height: 1.45; color: #222; margin: 0; }
+@media (max-width: 1199.98px) { .skin-card p.content { font-size: 12px; } }
+.skin-card .meta { font-family: 'Space Mono', monospace; font-size: 11px; color: #333; letter-spacing: 0.02em; }
+.card-pick {
+  appearance: none; border: 1px solid #000; background: transparent; color: #000; cursor: pointer;
+  font-family: 'Space Mono', monospace; font-size: 12px; text-transform: uppercase; padding: 0.3em 0.8em; transition: 0.3s;
+}
+.card-pick:hover, .card-pick.is-active { background: #000; color: #fff; }
+.card-art-tint { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(238, 97, 255, 0.16), rgba(8, 6, 15, 0.42)); }
+
+/* ================================ AWARDS/STATS =========================== */
+.stats .headline-wrapper { margin-top: -0.2em; display: flex; align-items: center; }
+.stats .headline-wrapper.last { margin-top: -0.3em; }
+.stats .and { font-size: 6vw; border: 1px solid rgba(145, 145, 145, 0.5); border-radius: 100%; padding: 2vw 7vw; }
+.stats .stat-word { font-size: 5.5vw !important; }
+@media (max-width: 991.98px) { .stats .stat-word { font-size: 11vw !important; } }
+.stat-row { display: flex; justify-content: space-between; border-bottom: 1px solid rgba(255, 255, 255, 0.16); padding: 0.55em 0; }
+.stat-row span:first-child { font-family: Inter, 'Noto Sans SC', sans-serif; font-size: 16px; text-transform: uppercase; color: #fff; }
+.stat-row span:last-child { font-family: Rajdhani, sans-serif; font-size: 26px; color: var(--cyan); }
+
+/* ================================ CONTACT =============================== */
+.contact-info { position: relative; font-family: 'Bodoni Moda', 'Noto Serif SC', serif; }
+.contact-info .line { width: 1px; height: 16vw; background: #fff; transform: rotate(22deg); transform-origin: top right !important; margin-top: 2rem; margin-left: -2rem; }
+.contact-info .sun-box { top: 0; margin-left: 7rem; margin-top: 3rem; position: absolute; }
+.contact-info .sun-box img { width: 28.5vw; }
+.email-link { font-family: 'Bodoni Moda', 'Noto Serif SC', serif; font-size: 4.5rem; color: var(--magenta); }
+
+/* ================================ FOOTER ================================ */
+.page-footer { height: auto; position: relative; }
+.watch-bottom { position: absolute; bottom: 0; border-top: 1px solid hsla(0, 0%, 100%, 0.2); padding: 5px 0; white-space: nowrap; width: 100%; }
+.watch-bottom .slash { margin: 0 0.4rem; }
+.watch-bottom .marquee-wrapper:hover span { color: var(--magenta); }
+.watch-bottom .marquee-wrapper:hover { cursor: pointer; }
+.social a { transition: 0.4s; }
+.social a:hover { color: var(--magenta) !important; }
+.footer-rainbow-rule { height: 1px; background: linear-gradient(90deg, transparent, var(--magenta), var(--cyan), transparent); opacity: 0.7; }
+
+/* ============================ DISTORTED LINK ============================= */
+.distorted-link { position: relative; outline: 120px solid transparent; }
+.distorted-link .distorted-line {
+  bottom: 0; left: 0; height: 1px; width: 100%; background: currentColor; position: absolute;
+  outline: 120px solid transparent; opacity: 1; pointer-events: none; transition: 1s; transform-origin: left;
+}
+.distorted-link.line-near .distorted-line { bottom: 0.1em; }
+.distorted-link:hover { color: var(--magenta) !important; }
+.distorted-link:hover .distorted-line { opacity: 0; transform: scaleX(0); }
+.distorted-link.reversed .distorted-line { opacity: 0; transform: scaleX(0); }
+.distorted-link.reversed:hover .distorted-line { opacity: 1; transform: scaleX(1); }
+
+/* ============================ SHOWREEL / TURNTABLE ======================= */
+.showreel { position: fixed; inset: 0; z-index: 9999999; background: rgba(4, 3, 8, 0.985); backdrop-filter: blur(14px); }
+.showreel-stage { position: absolute; inset: 0; }
+.showreel-close {
+  position: absolute; top: 1.2rem; right: 1.6rem; z-index: 3; cursor: pointer; color: #fff;
+  font-family: 'Space Mono', monospace; font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase;
+  border: 1px solid rgba(255, 255, 255, 0.3); background: transparent; padding: 0.5em 1em; transition: 0.3s;
+}
+.showreel-close:hover { border-color: var(--magenta); color: var(--magenta); }
+
+/* =============================== SCROLLBAR ============================== */
+.scroll-wrapper { height: 100vh; overflow: hidden; }
+.scroll-content { position: relative; z-index: 3; }
+.scrollbar-track { background: rgba(255, 255, 255, 0.06) !important; }
+.scrollbar-thumb { background: var(--magenta) !important; opacity: 0.5; }
+
+/* =============================== REDUCED MOTION ========================= */
+@media (prefers-reduced-motion: reduce) {
+  .rotating, .animating .marquee-1, .animating .marquee-2 { animation: none !important; }
+  .should-animate { opacity: 1 !important; transform: none !important; }
+}
