@@ -1,5 +1,10 @@
 # True Damage Ekko — 概念落地页
 
+🔗 **线上地址：https://nepheloovo.github.io/td-ekko-landing/** · [部署流水线](https://github.com/nepheloovo/td-ekko-landing/actions)
+
+> 已在**线上地址**做过端到端验证：零 console error、零 4xx/5xx，WebGL 背景舞台 976 帧持续渲染，
+> GLB 解析为 `5 部件 / 12,820 三角面`，点卡换肤到 `8 部件 / 25,900 三角面`，smooth-scroll 接管 7558px，鼠标轨迹线正常。
+
 用一次对 [synchronized.studio](https://synchronized.studio/) 的完整反推（见 [`../synchronized-studio-clone-prompt.md`](../synchronized-studio-clone-prompt.md)）得到的**设计与运动系统**，迁移到 **True Damage Ekko（skin 245019）** 上的粉丝概念落地页。
 
 **A 档实现**：three.js 实时渲染本项目自己提取的 **GLB**（不是图片），外加**自写 GLSL 全屏着色器**做的 WebGL 背景舞台。
