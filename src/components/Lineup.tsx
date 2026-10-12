@@ -19,7 +19,11 @@ export function Lineup({ activeGlb, onPick }: Props) {
     <div className="waypoint cases-listing color-white d-flex flex-column align-items-center justify-content-center position-relative w-100 pt-5 pb-5 top-spacing" id="lineup">
       <div className="w-100 gradient-top" />
 
-      <div className="d-flex align-items-center justify-content-center" style={{ marginTop: '-3rem' }}>
+      {/* `data-mask-origin` is the single source of truth for the section's
+          circular reveal (see useLineupMask): the circle's centre is measured
+          from THIS element at refresh time, so the disc is both the last thing
+          seen before the section and the hole it comes through. */}
+      <div className="d-flex align-items-center justify-content-center" data-mask-origin style={{ marginTop: '-3rem' }}>
         <Starburst rays={72} color="#FB58FC" style={{ width: '9rem', height: '9rem', opacity: 0.5 }} />
       </div>
 

@@ -4,6 +4,9 @@
 
 > 已在**线上地址**做过端到端验证：零 console error、零 4xx/5xx，WebGL 背景舞台 976 帧持续渲染，
 > GLB 解析为 `5 部件 / 12,820 三角面`，点卡换肤到 `8 部件 / 25,900 三角面`，smooth-scroll 接管 7558px，指针拖影（粒子）正常。
+>
+> 后续新增的 **GSAP 滚动演出**（加载退场时钟+扫屏 / 展台→技能区色差+雪花 / 技能区→皮肤列表圆形遮罩 / 切模型交叉溶解）
+> 也已在真实浏览器逐项实测，数字见下面「实测验证结果」。
 
 用一次对 [synchronized.studio](https://synchronized.studio/) 的完整反推（见 [`../synchronized-studio-clone-prompt.md`](../synchronized-studio-clone-prompt.md)）得到的**设计与运动系统**，迁移到 **True Damage Ekko（skin 245019）** 上的粉丝概念落地页。
 
@@ -84,16 +87,20 @@ npm run build && npm run preview   # 预览生产产物
 ## 页面结构（12 段）
 
 ```
-WebGLBackdrop → LoaderScreen → HeaderMarquee → Navigation → HeroHeadline(级联大字)
-→ EkkoStage(3D) → AbilitySection → SkinLineup → StatsSection → GetCta → Footer
-→ TurntableOverlay + TracingCursorLayer
+WebGLBackdrop → LoaderScreen → [ TimeSweep 退场 ] → HeaderMarquee → Navigation
+→ HeroHeadline(级联大字) → ScrollFx(#stage→#abilities 色差+雪花→环字)
+→ EkkoStage(3D, 交叉溶解) → AbilitySection → [ ScrollFx 圆形遮罩 ] → SkinLineup
+→ StatsSection → GetCta → Footer → TurntableOverlay(转台内换肤) + SnowBurst + ParticleTrail
 ```
+
+新文件：`src/lib/gsap.ts`（插件注册 + 共享 ease）、`src/lib/scrollFx.ts`（三段 ScrollTrigger 编排）、`src/components/TimeSweep.tsx`（退场时钟 + 扫屏）、`src/components/SnowBurst.tsx`（雪花层）。
 
 | 段 | 实现 |
 |---|---|
 | **WebGLBackdrop** | 真正的 WebGL2 全屏 pass：两张 4096×2048 拼贴层差速视差 + 指针径向扭转（`radius .28 / angle .35`）+ 动态颗粒 + 假点光 + 紫/品红分级 + 湿边暗角。每帧只写 uniform，不触发 React 渲染 |
-| **LoaderScreen** | 计数器 0→100，两段字标左右滑入，结束后**从 DOM 卸载**（不是隐藏）；计数器状态留在自己的子树里，不会 60fps 重渲染整页 |
-| **HeroHeadline** | 四行级联大字（`真实伤害` / `TRUE` / `DAMAGE` / `EKKO`）：逐行缩进阶梯 + 逐行颜色阶梯 + 三条交叉发丝线 + 星芒。**原先照搬的「叠 4 份 + clip-path 斜切 + 每带行偏移」已移除**（见差异表） |
+| **LoaderScreen** | 计数器 0→100，两段字标左右滑入；计数结束后进**退场段**：倒转时钟（指针逆时针、数字 100→000）+ 品红/青双色扫屏（左进、右出，1.75s），扫屏走完才卸载。计数器状态留在自己的子树里，不会 60fps 重渲染整页 |
+| **ScrollFx（三段滚动演出）** | `#stage→#abilities`：ScrollTrigger 一次性触发**色差**（WebGL 背景逐通道 UV 偏移 + 文案品红/青通道分离）＋**雪花**（六芒冰晶粒子），再交接给 `.circle-text` 环字的旋转（先转入、后无限续转）。`#abilities→#lineup`：以顶部光芒圆盘为圆心做 `clip-path: circle()` **圆形遮罩**，随滚动 scrub（可逆）。切模型时 `EkkoStage` 做 0.72s **交叉溶解** |
+| **HeroHeadline** | 四行级联大字（`真实伤害` / `TRUE` / `DAMAGE` / `EKKO`）：逐行缩进阶梯 + 逐行颜色阶梯 + 三条交叉发丝线 + 星芒。`#archive` 在 loader 报告 `onFinished` 之前**不存在于 DOM**；四行仍是 `should-animate` + `data-delay`，但整页的入场观察器要等扫屏结束才武装（`revealed`），所以行序不会和扫屏抢时间 |
 | **EkkoStage** | 真实 GLB + 三灯（品红主光 / 青光补光 / 金色轮廓）+ 指针倾斜（lerp）+ 拖拽惯性 + 滚动推镜 + 线框/自动旋转开关 |
 | **SkinLineup** | 3 张卡，复用源站卡契约：`col-sm-7`、`≥1200px max-width:580px`、`bg-white` 纸片 `opacity .9679`、5:6 画幅、巨型序号 |
 | **ParticleTrail** | 固定全屏 `<canvas>`（Canvas 2D，z-index 120）：指针拖影做成**时间碎片**——软光核 + 旋转细片、加法混合、青 `#5BD6FF` 为主品红 `#EE61FF` 点缀，继承指针速度的一小部分；寿命 700–1250ms，退出快于进入。池化 + 上限 200 个 + 单 rAF + DPR≤2，`visibilitychange` 停循环，`prefers-reduced-motion` 下整层不挂载。**取代了原先从参照站移植的 `#drawing-polyline` 连线拖影** |
@@ -123,7 +130,20 @@ WebGLBackdrop → LoaderScreen → HeaderMarquee → Navigation → HeroHeadline
 | 移动端 390×844 | `scrollWidth 390 == innerWidth`，**零横向溢出**，nav 项按断点隐藏 |
 | 构建 | `vite build` 成功 |
 
-截图证据在 [`preview/`](preview/)（hero / 3D 舞台 / 皮肤阵容 / 数据 / 2 个转台换肤 / 移动端）。
+- **#archive 门控**：加载计数器到 100 那一刻 #archive **才挂载**（此前 DOM 里查不到），但四行标题要等**扫屏结束**才动 —— 实测 `t=817ms` 时 `#archive=false / loader=true`，`t=2335ms`（`__tdExit` 出现）时 `#archive=true` 且四行 opacity 全 0，`t=4104ms`（loader 卸载）时四行仍全 0，`t=6310ms` 时四行与 nav 全部 1.00 ✓
+- **退场时长**：扫屏 1750ms，实测 loader 卸载发生在 exit 开始后 **1769ms**（`2335→4104`）✓
+- **退场期间不误盖页面**：扫屏 A/B 两带在"盖满"时合成完全不透明（首版半透明，实测截图上顶部 marquee 与 nav logo 从带子里透出来）；顺带发现 nav 的 logo 与 `245019` 是全页仅有的两个**没有** `should-animate` 的 chrome 元素，已并入同一套入场 ✓
+- **色差**：`#abilities` 触发时背景 shader 的 `uChroma` 实测峰值 `0.080`（滚过触发点期间采样），文案通道分离在峰值处约 ±12px（首版 0.05em ≈ 2px，浏览器里**看不出**，已按实测放大到 0.28em）✓
+- **雪花**：同帧抛 150 片（`__tdSnow = {spawned:150, live:150}`）✓
+- **环字不入场抢跑**：触发前 `.circle-text` opacity 0 / scale 0.86 / rotation −24°，爆发完成后 0.40 并持续旋转（1s 内 transform 矩阵确实变化）✓
+- **圆形遮罩**：`clip-path` 圆心实测 = 圆盘中心（1440 视口下 `cx=50% / cy=6.879%`，与 `[data-mask-origin]` 的 rect 逐像素吻合；390 视口下自动变 `cy=7.022%`）；半径随滚动 0 → 42% 线性推进，走完后 `clip-path` 直接置 `none`；滚回顶部可逆（回到 `circle(0%)`）✓
+- **遮罩性能**：整段 scrub 期间（不插截图测量）平均帧 **17.0ms**、最差 32ms、仅 3 帧 >20ms ✓ —— 所以没有退化成 transform/opacity 的替代方案
+- **交叉溶解**：转台内点第 3 个皮肤 → `__tdDissolve.active` 实测 2（旧模型淡出 + 新模型淡入同时进行），进度 0.47→0.63→0.79→0.95→1.00，模型计数同步由 `5 部件 / 12,820 三角面` 变为 `8 部件 / 25,900 三角面`（与工具包记录一致）✓
+- **减弱动效**：`emulateMedia({reducedMotion:'reduce'})` 下 —— 时钟/扫屏不出现、`.snow-burst` **不在 DOM 里**、环字静止在 CSS 的 0.40、`#lineup` 完全没有被 clip、色差被显式拦住（`__tdFxFired = 'abilities (reduced motion: burst suppressed)'`）✓
+- **移动端 390×844**：`scrollWidth 390 == innerWidth`，遮罩圆心按新视口重新测得 `cy=7.022%`，色差与雪花照常触发，环字转起来 ✓
+- **整页走查**：从顶滚到底再滚回，背景舞台帧数 426→1036 单调增长，51 个 `.should-animate` 里 50 个到达 opacity 1（剩 1 个是 `d-md-none` 的 `245019`，在 1440 视口本就不显示），**控制台 0 error** ✓
+
+截图证据在 [`preview/`](preview/)（hero / 3D 舞台 / 皮肤阵容 / 数据 / 2 个转台换肤 / 移动端），新增的四段演出在 [`preview/fx/`](preview/fx/)（退场时钟、扫屏、色差峰值、雪花、遮罩中段、遮罩走完、溶解中帧、溶解后 Arcane）。
 
 ---
 
@@ -143,6 +163,9 @@ WebGLBackdrop → LoaderScreen → HeaderMarquee → Navigation → HeroHeadline
 | **指针拖影** | 固定全屏 `<svg>` + `#drawing-polyline`（连线、可累积留痕） | **Canvas 2D 粒子拖影（时间碎片）** | 连线是「绘图工具」的隐喻；本页主体是握着时间装置的少年，拖影应该是**会溢出并熄灭的材质**，不是会累积的笔画。同时把 DOM/SVG 重绘换成池化 canvas，指针路径不再随移动无限增长 |
 | **卡片图片画幅** | 5:6 竖幅（`image-proportion.short`，`padding-bottom:120%`） | **跟随原画比例（1.695 横幅，`--frame-ar` 驱动）** | 源站的 5:6 是给它自己的竖构图项目图用的；Riot 原画是 1215×717 横幅，5:6 只能看到 **49% 宽度**，居中裁切正好把 Breakout 的人脸和电剑切掉（卡 1/卡 3 同样被裁，只是不明显）。改成比例一致后 `object-fit:cover` **零裁切**，人物整体可见。同时图片列从 `col-md-6` 加宽到 `col-md-8` |
 | 数据大字 | `.display-1` 18vw | 拉丁行降到 **5.5vw** | `TRUE DAMAGE` 11 字符 × 18vw = 2850px，必然折行溢出 |
+| **加载退场** | 计数器到 100 后 0.95s 淡出，`#loader` 从 DOM 移除 | **倒转时钟 + 品红/青双色扫屏（1.75s）**，扫完才移除 | 参照系统没有这一段；「倒带四秒」是这款皮肤的技能母题，所以退场不是淡出而是把时间倒着走一遍、再把调色板从左刮到右 |
+| **滚动演出** | 无（逐元素 `should-animate` 入场 + 一条 marquee） | **三段 ScrollTrigger 编排**：展台→技能区（色差+雪花→环字）、技能区→皮肤列表（圆形遮罩）、切模型（交叉溶解） | 参照系统只有"逐个元素淡入"，没有跨 section 的镜头语言；这三段都是本页主体（时间装置 / 技能 / 三套皮肤）独有的叙事动作 |
+| **转台换肤入口** | — | 覆盖层内新增三个皮肤切换按钮 | 点卡的按钮在覆盖层**下面**：没有它，第二次换肤必须先关掉覆盖层、滚回 `#lineup`、再点一次 —— 而交叉溶解唯一能全屏展示的地方就是这里 |
 
 ---
 
@@ -150,7 +173,7 @@ WebGLBackdrop → LoaderScreen → HeaderMarquee → Navigation → HeroHeadline
 
 1. **GLB 无骨骼/无动画**：工具包已实测确认 CDragon 不托管 `.skl` / `.anm`，静态网格是这条路的上限。要动画需本地客户端 `Ekko.wad.client` + `lol2gltf`。
 2. **官方中文技能名待核**：`Z 型驱动共振 / 时间卷曲器 / 平行收敛 / 相位俯冲 / 时空断裂` 按官方本地化写法录入，页面上也标了英文原名作为权威对照；公开发布前建议对客户端核一遍。技能描述文案是自写概念句，非 Riot tooltip 原文。
-3. **`three.js` 未做代码分割**：主 chunk 890 KB（gzip 261 KB）。做法：`manualChunks` 把 `three` 拆出来 + 3D 区块 `React.lazy`。
+3. **`three.js` 未做代码分割**：主 chunk 948 KB（gzip 283 KB，其中 GSAP + ScrollTrigger 约 58 KB）。做法：`manualChunks` 把 `three` / `gsap` 拆出来 + 3D 区块 `React.lazy`。
 4. ~~Arcane 原画缺图~~ **已解决**：工作区里 `splash_57.jpg` 只有 13 KB 且文件截断无法解码（背景合成脚本已容错跳过），已改为按工具包同一 URL 规则从 CommunityDragon 重新拉取 `ekko_splash_uncentered_57.jpg`（1215×717，HTTP 200 已解码校验），三张卡现在用的是同一套真实原画。
 
 ---

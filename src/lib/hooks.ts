@@ -1,19 +1,8 @@
 import { useEffect, useRef, type RefObject } from 'react';
-import gsap from 'gsap';
-import { CustomEase } from 'gsap/CustomEase';
 import Scrollbar from 'smooth-scrollbar';
+import { gsap, CustomEase, ScrollTrigger } from './gsap';
 
-gsap.registerPlugin(CustomEase);
-
-/**
- * The reference site eased its liquid-link hover with RoughEase
- * (rough({template:none.out, strength:2, points:120, taper:false, randomize:true})).
- * RoughEase is not in the public gsap package, so we author the equivalent
- * jitter curve as a CustomEase path: fast rise, jitter, settle at 1.
- */
-CustomEase.create('rough', 'M0,0 L0.06,0.42 L0.12,0.28 L0.18,0.55 L0.24,0.44 L0.3,0.66 L0.36,0.58 L0.44,0.72 L0.52,0.66 L0.6,0.8 L0.7,0.76 L0.8,0.88 L0.9,0.86 L0.96,0.97 L1,1');
-
-export { gsap, CustomEase };
+export { gsap, CustomEase, ScrollTrigger };
 
 /**
  * ScrollRevealWaypoint — the `should-animate` + `data-preset` system.
@@ -74,6 +63,41 @@ export type ScrollApi = {
   scrollTo: (y: number, ms?: number) => void;
 } | null;
 
+/**
+ * ScrollTrigger lives on `window` by default. This page never scrolls the
+ * window: `html{overflow:hidden}` + smooth-scrollbar translates `.scroll-content`
+ * inside a fixed-height wrapper. Without a proxy, every ScrollTrigger would
+ * compute every trigger position against a window that never moves, so nothing
+ * would ever fire.
+ *
+ * `scrollerProxy` gives ScrollTrigger a scroller whose scrollTop we can read and
+ * write, and whose viewport rect is declared as the window (the wrapper really is
+ * viewport-sized). Because `.scroll-content` is translated by -scrollTop, an
+ * element's `getBoundingClientRect().top` is already document-position minus
+ * scroll, so `scrollTop + rect.top` lands on the right document offset — the same
+ * arithmetic ScrollTrigger does for a native scroller.
+ *
+ * `ScrollTrigger.defaults({ scroller })` means section hooks below do NOT have to
+ * remember to pass `scroller` — a forgotten argument is a silent no-op, and that
+ * class of bug is invisible in review.
+ */
+function bindScrollTriggerToScrollbar(el: HTMLElement, bar: Scrollbar): void {
+  ScrollTrigger.scrollerProxy(el, {
+    scrollTop(value) {
+      if (typeof value === 'number') bar.scrollTo(0, value, 0);
+      return bar.offset.y;
+    },
+    getBoundingClientRect() {
+      return { top: 0, left: 0, width: window.innerWidth, height: window.innerHeight };
+    },
+    pinType: 'transform',
+  });
+  // ScrollTrigger.update is cheap and idempotent; the smooth-scrollbar listener
+  // fires from its own rAF loop, which is the only thing that moves the content.
+  bar.addListener(ScrollTrigger.update);
+  ScrollTrigger.defaults({ scroller: el });
+}
+
 /** SmoothScroll — smooth-scrollbar on the wrapper; reports normalised progress. */
 export function useSmoothScroll(
   wrapper: RefObject<HTMLElement | null>,
@@ -100,6 +124,7 @@ export function useSmoothScroll(
     const listener = () => onProgress(read());
     bar.addListener(listener);
     onProgress(read());
+    bindScrollTriggerToScrollbar(el, bar);
 
     api.current = {
       setProgress: () => {},
@@ -110,6 +135,7 @@ export function useSmoothScroll(
     (window as unknown as Record<string, unknown>).__tdScrollTo = (y: number, ms = 0) => bar?.scrollTo(0, y, ms);
     (window as unknown as Record<string, unknown>).__tdLimit = () =>
       Math.max(bar!.size.content.height - bar!.size.container.height, 1);
+    (window as unknown as Record<string, unknown>).__tdScrollTop = () => bar!.offset.y;
 
     const onAnchor = (e: Event) => {
       const target = (e.target as HTMLElement)?.closest?.('a[href^="#"]') as HTMLAnchorElement | null;
@@ -125,6 +151,10 @@ export function useSmoothScroll(
 
     return () => {
       document.removeEventListener('click', onAnchor);
+      // Every ScrollTrigger on the page belongs to this scroller; tear them all
+      // down with it (React StrictMode runs this effect twice in dev).
+      ScrollTrigger.getAll().forEach((t) => t.kill());
+      bar?.removeListener(ScrollTrigger.update);
       bar?.removeListener(listener);
       bar?.destroy();
       bar = null;

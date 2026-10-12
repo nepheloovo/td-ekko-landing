@@ -23,6 +23,33 @@ export type StageStats = {
   loading: boolean;
 };
 
+/** One half of a cross-dissolve: a model fading between two opacities. */
+type Fade = {
+  root: THREE.Object3D;
+  mats: THREE.MeshStandardMaterial[];
+  t: number;
+  dur: number;
+  from: number;
+  to: number;
+  /** true for the outgoing half — it is removed and disposed when it hits 0. */
+  outgoing: boolean;
+};
+
+/** How long a model swap takes to cross-dissolve. */
+const DISSOLVE = 0.72;
+
+/** Depth-first disposal of a loaded GLB subtree (geometry + textures + materials). */
+function disposeTree(root: THREE.Object3D) {
+  root.traverse((o) => {
+    const m = o as THREE.Mesh;
+    if (!m.isMesh) return;
+    m.geometry?.dispose();
+    const mat = m.material as THREE.MeshStandardMaterial;
+    mat?.map?.dispose();
+    mat?.dispose();
+  });
+}
+
 export class EkkoStage {
   private renderer: THREE.WebGLRenderer;
   private scene = new THREE.Scene();
@@ -49,6 +76,7 @@ export class EkkoStage {
   private pmrem?: THREE.PMREMGenerator;
   private disposers: Array<() => void> = [];
   private disposed = false;
+  private fades: Fade[] = [];
   public stats: StageStats = { ok: false, parts: 0, triangles: 0, loading: false };
 
   constructor(private canvas: HTMLCanvasElement) {
@@ -129,18 +157,27 @@ export class EkkoStage {
     return Math.round(t);
   }
 
+  /**
+   * Swap the model with a cross-dissolve.
+   *
+   * The outgoing mesh is NOT removed on the frame the new one arrives — it is
+   * kept, made transparent and faded to 0 over DISSOLVE seconds while the
+   * incoming model fades up from 0. Two details make the cross actually read as
+   * one image turning into another rather than as two ghosts:
+   *
+   *   - renderOrder -1 on the outgoing, +1 on the incoming, so the new model is
+   *     always composited ON TOP of the old one (three sorts the transparent
+   *     pass by renderOrder first, and both models sit at the same distance).
+   *   - depthWrite stays ON for the incoming half, so it occludes its own back
+   *     faces instead of reading as a glass shell while it fades up. Only the
+   *     outgoing half gives up depth writes.
+   *
+   * Swapping again mid-dissolve is safe: the previous fade record is dropped and
+   * the new one starts from whatever opacity the model currently has.
+   */
   private setModel(root: THREE.Object3D) {
     if (this.current) {
-      this.group.remove(this.current);
-      this.current.traverse((o) => {
-        const m = o as THREE.Mesh;
-        if (m.isMesh) {
-          m.geometry?.dispose();
-          const mat = m.material as THREE.MeshStandardMaterial;
-          mat?.map?.dispose();
-          mat?.dispose();
-        }
-      });
+      this.startFade(this.current, 0, DISSOLVE, true);
     }
 
     // Normalise: centre on X/Z, sit on Y=0, scale to a constant on-screen height.
@@ -171,6 +208,67 @@ export class EkkoStage {
     this.group.add(root);
     this.current = root;
     this.spin = { x: 0, y: 0, vx: 0, vy: 0 };
+    // The incoming half. First load included: a model that materialises out of
+    // the field reads as arriving, whereas a pop-in reads as a loading artefact.
+    this.startFade(root, 1, DISSOLVE * 0.8, false, 0);
+  }
+
+  /** Register (or replace) a fade record for `root` and prepare its materials. */
+  private startFade(root: THREE.Object3D, to: number, dur: number, outgoing: boolean, fromOverride?: number) {
+    // A root can only be fading once: a rapid second swap must not leave the old
+    // record fighting the new one for the same materials.
+    this.fades = this.fades.filter((f) => f.root !== root);
+
+    const mats: THREE.MeshStandardMaterial[] = [];
+    let from = fromOverride ?? 1;
+    let seen = false;
+    root.traverse((o) => {
+      const m = o as THREE.Mesh;
+      if (!m.isMesh) return;
+      const mat = m.material as THREE.MeshStandardMaterial;
+      if (mat) {
+        mats.push(mat);
+        // Interrupting a dissolve must not snap the model's alpha: take over
+        // from wherever it currently is.
+        if (!seen) { seen = true; if (fromOverride === undefined) from = mat.opacity; }
+        mat.transparent = true;
+        mat.opacity = from;
+        // Only the outgoing half gives up depth writes; see setModel.
+        mat.depthWrite = !outgoing;
+      }
+      m.renderOrder = outgoing ? -1 : 1;
+    });
+    this.fades.push({ root, mats, t: 0, dur, from, to, outgoing });
+  }
+
+  /** Advance every in-flight dissolve. Called from the render loop, not React. */
+  private stepFades(dt: number) {
+    if (!this.fades.length) return;
+    for (let i = this.fades.length - 1; i >= 0; i -= 1) {
+      const f = this.fades[i];
+      f.t += dt;
+      const k = Math.min(f.t / f.dur, 1);
+      const o = f.from + (f.to - f.from) * k;
+      for (const mat of f.mats) mat.opacity = o;
+      if (k < 1) continue;
+
+      this.fades.splice(i, 1);
+      if (f.outgoing) {
+        this.group.remove(f.root);
+        disposeTree(f.root);
+      } else {
+        for (const mat of f.mats) {
+          mat.opacity = 1;
+          mat.transparent = false;
+          mat.depthWrite = true;
+        }
+        f.root.traverse((o2) => { (o2 as THREE.Mesh).renderOrder = 0; });
+      }
+    }
+    (window as unknown as Record<string, unknown>).__tdDissolve = {
+      active: this.fades.length,
+      progress: this.fades[0] ? Math.min(this.fades[0].t / this.fades[0].dur, 1) : 1,
+    };
   }
 
   setScroll(p: number) {
@@ -284,6 +382,8 @@ export class EkkoStage {
       this.glow.quaternion.copy(this.camera.quaternion);
       this.glow.scale.setScalar(1 + 0.03 * Math.sin(t * 0.9));
 
+      this.stepFades(dt);
+
       this.renderer.render(this.scene, this.camera);
       this.raf = requestAnimationFrame(loop);
     };
@@ -300,6 +400,10 @@ export class EkkoStage {
     this.stop();
     this.disposers.forEach((d) => d());
     this.disposers = [];
+    // Anything still mid-dissolve owns geometry that nothing else will free.
+    this.fades.forEach((f) => disposeTree(f.root));
+    this.fades = [];
+    if (this.current) disposeTree(this.current);
     this.glow.geometry.dispose();
     (this.glow.material as THREE.Material).dispose();
     this.pmrem?.dispose();

@@ -87,6 +87,30 @@ family=Noto+Sans+SC:wght@300;400;700;900
 
 ---
 
+## 4b · 新增的滚动演出 `[ADD]`（参照系统里没有，属于本页主体的叙事动作）
+
+参照系统的运动语法只到「逐元素进入视口淡入」为止，没有跨 section 的镜头语言。下面四段是**新加**的，
+每一段都对准本页主体：一个把四秒倒带当武器的少年、一份倒着走的技能表、三套要对比着看的皮肤。
+
+| 段 | 触发 | 动作 | 依据 |
+|---|---|---|---|
+| **加载退场** | loader 计数到 100（`onFinished`） | 13rem 表盘 + 三根指针**逆时针**退（hour −220° / minute −540° / second −900°），中心数字 `100→000`；随后品红/青两带从左扫入、从右撤出（1.75s）。`#archive` 在 `onFinished` 时才挂载，四行标题要等扫屏**走完**才动 | 「倒带四秒」是 R 技能母题：退场不该是淡出，而是把时间倒着走一遍 |
+| **展台 → 技能区** | `#abilities` 到视口 62% 处，`once` | ①**色差**：背景全屏 shader 逐通道 UV 偏移（`uChroma` 峰值 0.08）+ 文案品红/青通道分离（峰值 0.28em）；②**雪花**：150 片六芒冰晶；③ 两者走完后 `.circle-text` 环字才转入并无限续转 | 技能区是"时间被拆开"的一段；色差与雪花都只发生一次，之后交回给一个稳定的旋转环字 |
+| **技能区 → 皮肤列表** | `#lineup` 到视口 78%→26%，scrub（可逆） | `clip-path: circle()` 圆心 = 顶部光芒圆盘的实测中心，半径 0→42% 线性推进，走完后直接置 `none` | 用户指定：**圆盘就是遮罩的起点**；所以圆心是量的、不是写死的 |
+| **切模型** | 任意 `glb` 变化（点卡 / 转台内换肤） | 旧模型留在场景里淡出、新模型从 0 淡入，0.72s | 三套皮肤是同一角色的三个状态：换肤该是"溶解"而不是"换张图" |
+
+三条实现约定（都是踩过的坑，写在这里避免回退）：
+
+1. **ScrollTrigger 必须挂在 smooth-scrollbar 上**（`scrollerProxy` + `defaults({scroller})`）。这个页面从不滚动
+   window（`html{overflow:hidden}` + 内容 transform），不代理的话每个 trigger 的 start/end 都算在一个永远不动的
+   viewport 上，一个都不会触发 —— 而且要盖住"作者忘了传 `scroller`"这类静默失效，所以走 `ScrollTrigger.defaults()`。
+2. **无限循环的 tween 不能放进会被 `onComplete` 依赖的 timeline**：`repeat:-1` 的子 tween 会让父 timeline 永不完成，
+   父级的 `onComplete` 静默失效。环字的无限续转因此挂在前一段 tween 的 `onComplete` 上，而不是塞进同一条 timeline。
+3. **动画初值由 GSAP 写、不写进 CSS**：环字的 `opacity:0 / scale:.86 / rotation:-24°` 与遮罩的 `clip-path` 都是
+   JS 里 `gsap.set` 的，所以 GSAP 万一没跑、或 `prefers-reduced-motion` 命中，页面只是**静止**而不会**消失**。
+
+---
+
 ## 5 · 章节顺序（12 段）
 
 ```

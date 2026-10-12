@@ -40,7 +40,12 @@ export function HeaderMarquee({ scrollEl }: { scrollEl: React.RefObject<HTMLElem
 
   return (
     <div ref={node} className="position-fixed t-0 l-0 w-100" style={{ zIndex: 99998, opacity: op, transition: 'opacity .2s linear', pointerEvents: op < 0.15 ? 'none' : 'auto' }}>
-      <a href="#lineup" style={{ textDecoration: 'none', color: 'inherit', display: 'block', padding: '3px 0' }}>
+      {/* The reveal class goes on the <a>, not on the wrapper: the wrapper's
+          inline `opacity` is rewritten by the scroll listener every frame, so a
+          GSAP opacity tween on it would be clobbered. This way the strip is
+          hidden until the opening sequence hands over, and still fades on scroll
+          afterwards (the wrapper multiplies it). */}
+      <a href="#lineup" className="should-animate" data-preset="opacity" data-delay="0.15" data-dur="1" style={{ textDecoration: 'none', color: 'inherit', display: 'block', padding: '3px 0' }}>
         <MarqueeLoop
           items={MARQUEE_TOP}
           className="header-marquee h6 color-white"

@@ -33,6 +33,7 @@ uniform vec2  uRes;
 uniform vec2  uMouse;    // 0..1, smoothed
 uniform float uTime;
 uniform float uScroll;   // 0..1 page progress
+uniform float uChroma;   // RGB-split amount, 0 at rest; driven by scrollFx
 uniform sampler2D uTex0; // lower sheet
 uniform sampler2D uTex1; // upper sheet
 
@@ -80,8 +81,28 @@ void main() {
 
   // ---- two parallaxing sheets ------------------------------------------
   float breathe = 1.0 + 0.012 * sin(uTime * 0.12);
-  vec3 lower = layer(uTex0, tuv, 1.06 * breathe, 1.0);   // fast / near
-  vec3 upper = layer(uTex1, tuv, 1.28 * breathe, 0.42);  // slow / far
+  vec3 lower;
+  vec3 upper;
+  if (uChroma > 0.0008) {
+    // A genuine chromatic aberration of the stage: each channel is sampled from
+    // its own UV, offset radially from the frame centre. Branching keeps the
+    // steady-state cost at two samples per frame — the split costs 6, and only
+    // exists for the ~0.4s the burst lasts.
+    vec2 ca = (tuv - 0.5) * uChroma;
+    lower = vec3(
+      layer(uTex0, tuv + ca, 1.06 * breathe, 1.0).r,
+      layer(uTex0, tuv,      1.06 * breathe, 1.0).g,
+      layer(uTex0, tuv - ca, 1.06 * breathe, 1.0).b
+    );
+    upper = vec3(
+      layer(uTex1, tuv + ca, 1.28 * breathe, 0.42).r,
+      layer(uTex1, tuv,      1.28 * breathe, 0.42).g,
+      layer(uTex1, tuv - ca, 1.28 * breathe, 0.42).b
+    );
+  } else {
+    lower = layer(uTex0, tuv, 1.06 * breathe, 1.0);   // fast / near
+    upper = layer(uTex1, tuv, 1.28 * breathe, 0.42);  // slow / far
+  }
 
   vec3 col = lower * 0.85 + upper * 0.55;
   col *= 0.22;                                  // stage sits at ~alpha .25 over #08060F
@@ -136,6 +157,7 @@ export class Backdrop {
   private target = { x: 0.62, y: 0.38 };
   private scroll = 0;
   private scrollTarget = 0;
+  private chroma = 0;
   private disposeResize?: () => void;
   private disposePointer?: () => void;
   private disposed = false;
@@ -167,7 +189,7 @@ export class Backdrop {
         throw new Error(`program link failed: ${gl.getProgramInfoLog(program)}`);
       }
       this.program = program;
-      for (const n of ['uRes', 'uMouse', 'uTime', 'uScroll', 'uTex0', 'uTex1']) {
+      for (const n of ['uRes', 'uMouse', 'uTime', 'uScroll', 'uChroma', 'uTex0', 'uTex1']) {
         this.loc[n] = gl.getUniformLocation(program, n);
       }
 
@@ -249,6 +271,11 @@ export class Backdrop {
     this.scrollTarget = progress;
   }
 
+  /** RGB-split amount for the full-screen pass. 0 = off (default). */
+  setChroma(v: number) {
+    this.chroma = Math.max(0, Math.min(v, 0.12));
+  }
+
   play() {
     if (this.disposed || this.running) return;
     this.running = true;
@@ -267,6 +294,10 @@ export class Backdrop {
         gl.uniform2f(this.loc.uMouse, this.mouse.x, this.mouse.y);
         gl.uniform1f(this.loc.uTime, (performance.now() - this.start) / 1000);
         gl.uniform1f(this.loc.uScroll, this.scroll);
+        // Written straight through: scrollFx.ts authors the envelope, including
+        // the hard steps that make the burst read as a glitch. Smoothing it here
+        // would round off exactly the frames that carry the effect.
+        gl.uniform1f(this.loc.uChroma, this.chroma);
         gl.activeTexture(gl.TEXTURE0);
         gl.bindTexture(gl.TEXTURE_2D, this.textures[0]);
         gl.activeTexture(gl.TEXTURE1);

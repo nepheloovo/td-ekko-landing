@@ -1,6 +1,15 @@
 import { useEffect, useRef, useState } from 'react';
+import { TimeSweep } from './TimeSweep';
 
-type Props = { sources: string[]; onFinished: () => void; minDurationMs?: number };
+type Props = {
+  sources: string[];
+  /** Loading finished: the counter reached 100. App mounts #archive on this. */
+  onFinished: () => void;
+  /** The EXIT段 finished. App arms the hero's should-animate system on this and
+   *  unmounts the loader — the sweep's last frame is the hero's first. */
+  onExitComplete?: () => void;
+  minDurationMs?: number;
+};
 
 /**
  * OpeningSequence — self-contained loader.
@@ -12,13 +21,16 @@ type Props = { sources: string[]; onFinished: () => void; minDurationMs?: number
  * Stage 0  mount            -> counter 0, wordmarks hidden
  * Stage 1  preloading       -> images decoded + GLB fetched (counter creeps to 92)
  * Stage 2  completion       -> counter eases to 100, no earlier than minDurationMs
- * Stage 3  exit             -> fade out, then this component returns null
- *                             (the reference REMOVED #loader; it did not hide it)
+ * Stage 3  exit             -> TimeSweep: clock rewinds, magenta/cyan wipe covers,
+ *                             then leaves to the right. This component is NOT
+ *                             removed here (the reference removed #loader after a
+ *                             flat 950ms fade); App removes it when the sweep
+ *                             reports back, so the loader can never disappear
+ *                             from under the exit animation.
  */
-export function Loader({ sources, onFinished, minDurationMs = 2200 }: Props) {
+export function Loader({ sources, onFinished, onExitComplete, minDurationMs = 2200 }: Props) {
   const [progress, setProgress] = useState(0);
   const [done, setDone] = useState(false);
-  const [gone, setGone] = useState(false);
   const assetsReady = useRef(false);
   const started = useRef(performance.now());
 
@@ -70,11 +82,7 @@ export function Loader({ sources, onFinished, minDurationMs = 2200 }: Props) {
   useEffect(() => {
     if (!done) return;
     onFinished();
-    const t = setTimeout(() => setGone(true), 950);
-    return () => clearTimeout(t);
   }, [done, onFinished]);
-
-  if (gone) return null;
 
   const show = (at: number) => (progress > at ? 1 : 0);
   const slide = (at: number, from: number) => ({
@@ -84,7 +92,18 @@ export function Loader({ sources, onFinished, minDurationMs = 2200 }: Props) {
   });
 
   return (
-    <div className="loader loader-padding" style={{ opacity: done ? 0 : 1, transition: 'opacity .9s ease' }}>
+    <>
+      <div
+        className="loader loader-padding"
+        style={{
+          opacity: done ? 0 : 1,
+          transition: 'opacity .9s ease',
+          // The field is already transparent once the sweep has covered the
+          // screen; without this the loader would keep swallowing clicks for the
+          // whole 1.75s exit.
+          pointerEvents: done ? 'none' : 'auto',
+        }}
+      >
       <div className="d-flex justify-content-between align-items-start">
         <p className="display-4 font-E" style={{ margin: 0, lineHeight: 1 }}>{Math.round(progress)}</p>
       </div>
@@ -116,7 +135,12 @@ export function Loader({ sources, onFinished, minDurationMs = 2200 }: Props) {
         </div>
       </div>
 
-      <div className="loader-bar" style={{ width: `${progress}%` }} />
-    </div>
+        <div className="loader-bar" style={{ width: `${progress}%` }} />
+      </div>
+
+      {/* Sibling, not child: .loader fades its whole subtree to opacity 0, and the
+          exit sequence has to stay at full strength while the counter goes. */}
+      {done && <TimeSweep onDone={onExitComplete ?? (() => {})} />}
+    </>
   );
 }

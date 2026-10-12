@@ -4,6 +4,8 @@ import { asset } from '../lib/asset';
 
 export type BackdropApi = {
   setScroll: (p: number) => void;
+  /** RGB split for the abilities burst; 0 at rest. */
+  setChroma: (v: number) => void;
   stop: () => void;
   start: () => void;
   state: BackdropState;
@@ -24,6 +26,7 @@ export function Backdrop({ onReady }: { onReady?: (api: BackdropApi) => void }) 
       if (!state.ok) console.warn('[backdrop]', state.error);
       const api = {
         setScroll: (p: number) => instance.setScroll(p),
+        setChroma: (v: number) => instance.setChroma(v),
         stop: () => instance.stop(),
         start: () => instance.play(),
         state,

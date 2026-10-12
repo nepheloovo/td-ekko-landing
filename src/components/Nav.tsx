@@ -6,7 +6,19 @@ export function Nav() {
   return (
     <section className="navigation no-events">
       <div className="nav-bar px-1 py-1 px-md-3 py-md-2 bg-black123">
-        <a href="#archive" className="logo-wrapper position-relative d-flex flex-column enabled h6" style={{ textDecoration: 'none', color: '#fff' }}>
+        {/* The logo and the 245019 link were the two nav elements with no
+            `should-animate`, so they were the only chrome that appeared while the
+            loader was still fading — i.e. before the wipe, before the hero. They
+            join the same reveal as the links below them. */}
+        <a
+          href="#archive"
+          className="logo-wrapper position-relative d-flex flex-column enabled h6 should-animate"
+          data-preset="opacity,y"
+          data-delay="0.3"
+          data-dur="0.9"
+          data-fromy="16"
+          style={{ textDecoration: 'none', color: '#fff' }}
+        >
           <span className="font-A" style={{ fontSize: '2.1rem', lineHeight: 0.9, letterSpacing: '0.02em' }}>EKKO</span>
           <span className="font-M" style={{ fontSize: '0.5rem', letterSpacing: '0.22em', opacity: 0.72 }}>真实伤害 / TRUE DAMAGE</span>
         </a>
@@ -32,7 +44,7 @@ export function Nav() {
               </a>
             </div>
           ))}
-          <div className="lh-1 h6" style={{ marginTop: '0.6em' }}>
+          <div className="lh-1 h6 should-animate" data-preset="opacity,y" data-delay="0.62" data-dur="0.9" data-fromy="16" style={{ marginTop: '0.6em' }}>
             <DistortedLink text="245019" href="#lineup" className="font-M tap" innerClassName="h6" />
           </div>
         </div>

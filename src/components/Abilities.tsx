@@ -12,8 +12,13 @@ export function Abilities() {
             <Starburst rays={90} color="#5BD6FF" style={{ width: '5rem', height: '5rem' }} />
           </div>
 
+          {/* The ring is NOT on a CSS `rotating` loop any more: scrollFx.ts owns
+              it, because the spin has to start only after the chromatic burst
+              and the snow have finished. Under reduced motion — or if GSAP never
+              runs — the stylesheet's static .circle-text opacity keeps it
+              visible, just still. */}
           <div aria-hidden="true" className="circle-text" style={{ pointerEvents: 'none' }}>
-            <CircleTextRing text="TIME / REWIND / TIME / REWIND / " color="#EE61FF" className="w-100 rotating" />
+            <CircleTextRing text="TIME / REWIND / TIME / REWIND / " color="#EE61FF" className="w-100" />
           </div>
 
           <h5 className="uppercase font-B lh-1 d-none d-md-block" style={{ position: 'absolute', top: '-3.5rem', right: '-9rem', transform: 'rotate(90deg)', transformOrigin: 'center', whiteSpace: 'nowrap', letterSpacing: '0.06em', fontSize: '1.6rem' }}>

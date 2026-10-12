@@ -490,6 +490,12 @@ body.reel-open {
   border: 1px solid rgba(255, 255, 255, 0.3); background: transparent; padding: 0.5em 1em; transition: 0.3s;
 }
 .showreel-close:hover { border-color: var(--magenta); color: var(--magenta); }
+/* In-overlay skin swap: the card strip that opened the overlay is behind it, so
+   the dissolve between models needs its own trigger inside the overlay. */
+.showreel-skins {
+  position: absolute; right: 1.6rem; bottom: 1.4rem; z-index: 3;
+  display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 0.5rem; max-width: 60vw;
+}
 
 /* =============================== SCROLLBAR ============================== */
 .scroll-wrapper { height: 100vh; overflow: hidden; }
@@ -497,8 +503,69 @@ body.reel-open {
 .scrollbar-track { background: rgba(255, 255, 255, 0.06) !important; }
 .scrollbar-thumb { background: var(--magenta) !important; opacity: 0.5; }
 
+/* ========================= SCROLL SET PIECES ==============================
+   Three choreographed moments, each owned by src/lib/scrollFx.ts:
+     #stage -> #abilities   chromatic burst + snow  -> ring spin-up
+     #abilities -> #lineup  circular mask out of the light disc (clip-path)
+   and the opening exit below. Nothing here is a decorative loop: every one of
+   them is triggered by a boundary the reader crosses.
+   ========================================================================= */
+
+/* The snowflake burst thrown when #abilities arrives. Above the page (z 3) and
+   the particle trail (120), below the fixed chrome (100000). */
+.snow-burst { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 150; pointer-events: none; display: block; }
+
+/* ====================== OPENING SEQUENCE / EXIT =========================== */
+/* The loader counted 0 -> 100; this rewinds the clock and drags the palette
+   across the frame. It sits ABOVE the loader (99999999) so the wipe covers the
+   fading counter, and it never takes pointer events — it is a picture. */
+.time-sweep { position: fixed; inset: 0; z-index: 100000000; pointer-events: none; overflow: hidden; }
+.sweep-band {
+  position: absolute; top: -2%; bottom: -2%; left: -2%; width: 104%;
+  transform: scaleX(0); transform-origin: left center; will-change: transform;
+}
+/* band A is the opaque violet-magenta field; band B is the cyan tear laid over
+   it, ramping in from transparent on the left. The composite reads purple ->
+   magenta -> cyan -> white across the frame, and because band A is opaque the
+   pair actually covers the page (a translucent pair let the nav and the loader
+   show through at the moment of "full cover", which broke the reveal). Each
+   band ends on a hard white rim: that rim is the wiping edge. */
+.sweep-band-a { background: linear-gradient(90deg, rgba(238,97,255,1) 0%, rgba(238,97,255,1) 92%, #fff 100%); }
+.sweep-band-b { background: linear-gradient(90deg, rgba(91,214,255,0) 0%, rgba(91,214,255,.52) 28%, rgba(91,214,255,.96) 88%, #fff 100%); }
+
+.time-clock {
+  position: absolute; top: 50%; left: 50%; width: 13rem; height: 13rem;
+  transform: translate(-50%, -50%); border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, .3);
+  background: radial-gradient(circle at 50% 42%, rgba(8, 6, 15, .86) 0%, rgba(8, 6, 15, .58) 58%, rgba(8, 6, 15, .18) 100%);
+  box-shadow: 0 0 3.5rem rgba(238, 97, 255, .3), inset 0 0 2rem rgba(91, 214, 255, .16);
+}
+.clock-ticks {
+  position: absolute; inset: -1px; border-radius: 50%;
+  background: repeating-conic-gradient(from -0.24deg, rgba(255, 255, 255, .85) 0 .5deg, transparent .5deg 6deg);
+  -webkit-mask: radial-gradient(circle, transparent 0 85%, #000 85% 100%);
+  mask: radial-gradient(circle, transparent 0 85%, #000 85% 100%);
+}
+.hand { position: absolute; left: 50%; bottom: 50%; width: 2px; transform-origin: 50% 100%; border-radius: 2px; }
+.hand-hour { height: 3rem; background: var(--cyan); }
+.hand-minute { height: 4.3rem; background: var(--magenta); }
+.hand-second { height: 5.2rem; width: 1px; background: rgba(255, 255, 255, .66); }
+.clock-count {
+  position: absolute; left: 50%; top: 50%; transform: translate(-50%, -34%); margin: 0;
+  font-family: Rajdhani, 'Noto Sans SC', sans-serif; font-size: 2.4rem; font-weight: 600; letter-spacing: .04em;
+  color: rgba(255, 255, 255, .92); text-shadow: 0 0 1.2rem rgba(238, 97, 255, .55);
+}
+.clock-label {
+  position: absolute; left: 50%; top: calc(100% + .9rem); transform: translateX(-50%); margin: 0; white-space: nowrap;
+  font-size: .55rem; letter-spacing: .24em; color: rgba(255, 255, 255, .62);
+}
+
 /* =============================== REDUCED MOTION ========================= */
 @media (prefers-reduced-motion: reduce) {
   .rotating, .animating .marquee-1, .animating .marquee-2 { animation: none !important; }
   .should-animate { opacity: 1 !important; transform: none !important; }
+  /* The exit sequence is pure ornament: under reduced motion the loader just
+     disappears, and neither the burst nor the mask is ever armed (scrollFx.ts
+     returns before writing any GSAP state). */
+  .time-sweep, .snow-burst { display: none !important; }
 }
