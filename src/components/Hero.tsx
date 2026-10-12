@@ -30,19 +30,25 @@ const ROWS = [
 export function Hero({ onPlayPreview }: { onPlayPreview: () => void }) {
   return (
     <div className="waypoint page-header color-white px-0 pt-5 pb-3" id="archive">
-      <div className="big-headline huge-text" style={{ width: '100%' }}>
-        {ROWS.map((row, i) => (
-          <span
-            key={row.text}
-            className={`d-block inner-text text-row-${i + 1} should-animate ${row.cls}`}
-            data-preset="opacity,y"
-            data-delay={row.delay.toFixed(2)}
-            data-dur="1.2"
-            data-fromy="34"
-          >
-            {row.text}
-          </span>
-        ))}
+      <div className="big-headline" style={{ width: '100%' }}>
+        {/* `huge-text` sets font-size 13.5-20vw. It must wrap ONLY the rows: with it
+            on .big-headline, every class-less wrapper in .content-box inherited a
+            194px font-size, so its line-box strut became 194.4 x 1.5 = 292px and
+            pushed the CTA ~195px down onto the DAMAGE glyphs. */}
+        <div className="huge-text">
+          {ROWS.map((row, i) => (
+            <span
+              key={row.text}
+              className={`d-block inner-text text-row-${i + 1} should-animate ${row.cls}`}
+              data-preset="opacity,y"
+              data-delay={row.delay.toFixed(2)}
+              data-dur="1.2"
+              data-fromy="34"
+            >
+              {row.text}
+            </span>
+          ))}
+        </div>
 
         <div className="lines" aria-hidden="true">
           <div className="line line-1 should-animate" data-preset="opacity" data-delay="0.55" data-dur="1" />
