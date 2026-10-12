@@ -279,8 +279,11 @@ body.reel-open {
    box without changing the visual size of the text. */
 .tap { display: inline-block; padding: 0.4em 0.22em; }
 
-/* ================================ TRACING ================================= */
-.tracing-layer { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 120; pointer-events: none; }
+/* ============================== PARTICLE TRAIL ============================
+   Replaces the transplanted SVG polyline trail: same layer slot (above the
+   content, below the loader/overlay), but the trail is emitted material that
+   dies rather than a stroke that accumulates. */
+.particle-trail { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 120; pointer-events: none; display: block; }
 
 /* ================================= LOADER ================================= */
 .loader {

@@ -39,7 +39,7 @@
 | `--violet-mid` | `#5B3A9E` | 中间调、发梢紫 |
 | `--neon-magenta` | `#EE61FF` | **主强调色**：标题描边、hover、CTA、太阳图标（原画 `#ee61ff` 实测） |
 | `--neon-pink` | `#FB58FC` | 次级霓虹、光斑（原画 `#fb58fc` 实测） |
-| `--neon-cyan` | `#5BD6FF` | **轨迹线颜色**（替代原系统的 `#A3EC26`）、冷光、数据 |
+| `--neon-cyan` | `#5BD6FF` | **拖影主色**（替代原系统的 `#A3EC26`）、冷光、数据 |
 | `--neon-gold` | `#EA981A` | 连帽衫内衬/球鞋金（原画 `#ea981a` 实测），用于页码与极少数高光 |
 | `--hot-white` | `#FBFFF1` | 高光文字 |
 | `#FFFFFF` / `#919191` | — | 主文字 / 次级文字 |
@@ -78,7 +78,7 @@ family=Noto+Sans+SC:wght@300;400;700;900
 1. **固定全屏 WebGL 背景舞台**：两张预合成拼贴层差速视差 + 鼠标径向扭转 + 颗粒 + 假点光，全屏 `position:fixed`。
 2. **clip-path 斜切切片大标题**：同一段四行文字叠 4 份，各用 `clip-path:polygon(...)` 切成斜带 + 每带行偏移不同。
 3. **开场加载器**：计数器 0→100 + 两段字标，结束后 `#loader` 从 DOM 移除。
-4. **鼠标轨迹 polyline**：固定全屏 `<svg>` + `#drawing-polyline`，`stroke-width:2`，`fill:none`，跟随指针留痕。
+4. **鼠标拖影**：原先照搬了参照站的 `#drawing-polyline` 连线；现已**主动偏离**为 Canvas 2D 粒子拖影（时间碎片），保留「指针驱动的全屏上层动效」这一槽位与 z-index 120。详见 README 差异表。
 5. **distorted-link 液态 hover**：GSAP 驱动 `#filter-4` 的 `feTurbulence.baseFrequency`（`.04→0`，`.6s`，rough ease）+ 下划线 `scaleX→0`。
 6. **marquee 双份无缝循环**：`.marquee-1` / `.marquee-2` 各一份，30s linear，`animation-delay:-15s / 0s`。
 7. **smooth-scrollbar** 接管滚动，`html{overflow:hidden}`，禁止出现原生滚动条。

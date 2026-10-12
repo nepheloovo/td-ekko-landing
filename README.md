@@ -3,7 +3,7 @@
 🔗 **线上地址：https://nepheloovo.github.io/td-ekko-landing/** · [部署流水线](https://github.com/nepheloovo/td-ekko-landing/actions)
 
 > 已在**线上地址**做过端到端验证：零 console error、零 4xx/5xx，WebGL 背景舞台 976 帧持续渲染，
-> GLB 解析为 `5 部件 / 12,820 三角面`，点卡换肤到 `8 部件 / 25,900 三角面`，smooth-scroll 接管 7558px，鼠标轨迹线正常。
+> GLB 解析为 `5 部件 / 12,820 三角面`，点卡换肤到 `8 部件 / 25,900 三角面`，smooth-scroll 接管 7558px，指针拖影（粒子）正常。
 
 用一次对 [synchronized.studio](https://synchronized.studio/) 的完整反推（见 [`../synchronized-studio-clone-prompt.md`](../synchronized-studio-clone-prompt.md)）得到的**设计与运动系统**，迁移到 **True Damage Ekko（skin 245019）** 上的粉丝概念落地页。
 
@@ -96,7 +96,7 @@ WebGLBackdrop → LoaderScreen → HeaderMarquee → Navigation → HeroHeadline
 | **HeroHeadline** | 同一段四行文字叠 **4 份**，各用源站**逐字polygon** 切成斜带、每带行偏移不同 → 斜切错位大字 |
 | **EkkoStage** | 真实 GLB + 三灯（品红主光 / 青光补光 / 金色轮廓）+ 指针倾斜（lerp）+ 拖拽惯性 + 滚动推镜 + 线框/自动旋转开关 |
 | **SkinLineup** | 3 张卡，复用源站卡契约：`col-sm-7`、`≥1200px max-width:580px`、`bg-white` 纸片 `opacity .9679`、5:6 画幅、巨型序号 |
-| **TracingCursor** | 固定全屏 `<svg>` 里的 `#drawing-polyline`，`#5BD6FF` / 2px / `fill:none`，指针划过就留痕 |
+| **ParticleTrail** | 固定全屏 `<canvas>`（Canvas 2D，z-index 120）：指针拖影做成**时间碎片**——软光核 + 旋转细片、加法混合、青 `#5BD6FF` 为主品红 `#EE61FF` 点缀，继承指针速度的一小部分；寿命 700–1250ms，退出快于进入。池化 + 上限 200 个 + 单 rAF + DPR≤2，`visibilitychange` 停循环，`prefers-reduced-motion` 下整层不挂载。**取代了原先从参照站移植的 `#drawing-polyline` 连线拖影** |
 | **DistortedLink** | GSAP 驱动 `#filter-4` 的 `feTurbulence.baseFrequency` `.04→0 / .6s / rough ease`，下划线 `scaleX→0` |
 | 其余 | marquee 双份 30s 无缝循环、smooth-scrollbar、`should-animate` + `data-preset` 逐元素入场、旋转星芒 |
 
@@ -113,7 +113,9 @@ WebGLBackdrop → LoaderScreen → HeaderMarquee → Navigation → HeroHeadline
 | 3D 模型解析 | `5 PARTS · 12,820 TRIANGLES`，与工具包 `validate_glb.py` 的记录**完全一致** |
 | 卡片热替换 GLB | 卡 2 → Breakout：`6 parts / 15,398 tris`；卡 3 → Arcane：`8 parts / 25,900 tris` —— 三个都与工具包记录逐项吻合 |
 | 切片大字 | 4 条 `clip-path` 计算值与源站多边形逐字一致；行高修正为 1.0（源站实测值） |
-| 轨迹线 | `points="500,320 760,420 980,380 1180,300"`，`stroke rgb(91,214,255)` ✓ |
+| 指针拖影 | `__tdTrail` 指针扫过时 `emitted 0→162`、`live 130`、池上限 200 生效；画布确有像素；点击额外爆 14 颗 ✓ |
+| 拖影性能 | 扫过过程中 **60fps**，最差帧 18.4ms；零 console error ✓ |
+| 减弱动效 | `emulateMedia({reducedMotion:'reduce'})` 后 **`.particle-trail` 不在 DOM 里**（整层不挂载）✓ |
 | 卡片契约 | 3 张卡 width 580px、`sheet opacity 0.9679` ✓ |
 | 顶部 marquee | 滚动后 opacity → 0 ✓ |
 | loader | 完成后 DOM 中不存在 `.loader` ✓ |
@@ -136,6 +138,7 @@ WebGLBackdrop → LoaderScreen → HeaderMarquee → Navigation → HeroHeadline
 | 字体 | RL-Unno / Domaine Display Condensed / Founders Grotesk（试用） | Bodoni Moda + Noto Serif SC + Bebas Neue + Inter + Rajdhani + Space Mono | 全部 Google Fonts 实测 200，含中文字符集覆盖 |
 | **字号微调（已记录）** | `.huge-text` 恒定 16vw | ≥1440px 降为 **13.5vw** | 源站 4 行 × 16vw 在 900px 高视口下放不下（源站自己也把末行切在折叠线下）；为保证整段字标首屏可读而下调 |
 | 卡片标题字号 | 90px / `lh .8` | **3.4rem / `lh 1.02`** | 源站那套是给长拉丁标题调的；中文在 `.8` leading 下会字形相撞（实测 h 由 69 → 54 才暴露问题） |
+| **指针拖影** | 固定全屏 `<svg>` + `#drawing-polyline`（连线、可累积留痕） | **Canvas 2D 粒子拖影（时间碎片）** | 连线是「绘图工具」的隐喻；本页主体是握着时间装置的少年，拖影应该是**会溢出并熄灭的材质**，不是会累积的笔画。同时把 DOM/SVG 重绘换成池化 canvas，指针路径不再随移动无限增长 |
 | **卡片图片画幅** | 5:6 竖幅（`image-proportion.short`，`padding-bottom:120%`） | **跟随原画比例（1.695 横幅，`--frame-ar` 驱动）** | 源站的 5:6 是给它自己的竖构图项目图用的；Riot 原画是 1215×717 横幅，5:6 只能看到 **49% 宽度**，居中裁切正好把 Breakout 的人脸和电剑切掉（卡 1/卡 3 同样被裁，只是不明显）。改成比例一致后 `object-fit:cover` **零裁切**，人物整体可见。同时图片列从 `col-md-6` 加宽到 `col-md-8` |
 | 数据大字 | `.display-1` 18vw | 拉丁行降到 **5.5vw** | `TRUE DAMAGE` 11 字符 × 18vw = 2850px，必然折行溢出 |
 

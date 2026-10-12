@@ -10,7 +10,7 @@ import { Lineup } from './components/Lineup';
 import { Stats } from './components/Stats';
 import { GetCta } from './components/GetCta';
 import { Footer } from './components/Footer';
-import { TracingCursor } from './components/TracingCursor';
+import { ParticleTrail } from './components/ParticleTrail';
 import { SvgFilters } from './components/SvgFilters';
 import { TurntableOverlay } from './components/TurntableOverlay';
 import { useSmoothScroll, useWaypointReveal } from './lib/hooks';
@@ -101,7 +101,7 @@ export default function App() {
       </div>
 
       <TurntableOverlay open={reelOpen} glb={glb} title={reelTitle} onClose={closeReel} />
-      <TracingCursor />
+      <ParticleTrail />
     </>
   );
 }
