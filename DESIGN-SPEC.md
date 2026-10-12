@@ -53,7 +53,7 @@
 
 | 原角色 | 原字体 | 本页字体 | 用途 |
 |---|---|---|---|
-| `Font-A` 高对比 display 衬线 | RL-Unno Trial | **Bodoni Moda** 900（拉丁）+ **Noto Serif SC** 900（中文） | 首屏切片大字 `TRUE / DAMAGE / EKKO` 与 `真实伤害` |
+| `Font-A` 高对比 display 衬线 | RL-Unno Trial | **Bodoni Moda** 900（拉丁）+ **Noto Serif SC** 900（中文） | 首屏级联大字 `TRUE / DAMAGE / EKKO` 与 `真实伤害` |
 | `Font-B` 压缩展示字 | Domaine Display Condensed | **Bebas Neue** + **Noto Sans SC** 700 | section 大标题、nav、marquee |
 | `Font-C` 正文 grotesque | Founders Grotesk | **Inter** + **Noto Sans SC** | 正文、UI |
 | `Font-E` 轻量数字 | Founders Grotesk Light | **Rajdhani** 400/600 | loader 计数器、数据数字 |
@@ -76,7 +76,7 @@ family=Noto+Sans+SC:wght@300;400;700;900
 ## 4 · 保留的系统语法 `[KEEP]`
 
 1. **固定全屏 WebGL 背景舞台**：两张预合成拼贴层差速视差 + 鼠标径向扭转 + 颗粒 + 假点光，全屏 `position:fixed`。
-2. **clip-path 斜切切片大标题**：同一段四行文字叠 4 份，各用 `clip-path:polygon(...)` 切成斜带 + 每带行偏移不同。
+2. ~~**clip-path 斜切切片大标题**~~ **已移除**（见 §6 差异表）：该设备为参照站的长 Latin 词调参，用在本页 4–6 字的短行上会切碎字母。现为单次渲染的级联大字（缩进阶梯 + 逐行颜色 + 发丝线 + 星芒保留）。
 3. **开场加载器**：计数器 0→100 + 两段字标，结束后 `#loader` 从 DOM 移除。
 4. **鼠标拖影**：原先照搬了参照站的 `#drawing-polyline` 连线；现已**主动偏离**为 Canvas 2D 粒子拖影（时间碎片），保留「指针驱动的全屏上层动效」这一槽位与 z-index 120。详见 README 差异表。
 5. **distorted-link 液态 hover**：GSAP 驱动 `#filter-4` 的 `feTurbulence.baseFrequency`（`.04→0`，`.6s`，rough ease）+ 下划线 `scaleX→0`。
@@ -103,7 +103,7 @@ WebGLBackdrop → LoaderScreen → HeaderMarquee → Navigation → HeroHeadline
 | 2 | LoaderScreen | 计数器 `0→100`（Rajdhani 3.8rem）；字标两段 `真实伤害` / `TRUE DAMAGE`；`.display-progress{left:85vw}` |
 | 3 | HeaderMarquee | `TRUE DAMAGE EKKO ✦ 245019 ✦` 重复 40× 两份；fixed top；滚过 200px 淡出 |
 | 4 | Navigation | 左：`EKKO` 字标 + `真实伤害 / TRUE DAMAGE`；右：皮肤档案 / 技能 / 皮肤阵容 / 数据 / 获取；ARCHIVE 位改为 `245019` |
-| 5 | HeroHeadline | 四行切片栈：`真实伤害` / `TRUE` / `DAMAGE` / `EKKO`；四条 clip-path 与行偏移逐字保留；三条 `#5BD6FF`/`#EE61FF` 发丝线交叉 |
+| 5 | HeroHeadline | 四行级联栈：`真实伤害` / `TRUE` / `DAMAGE` / `EKKO`；逐行缩进 1.05em→2.5em、逐行颜色由白到淡紫；三条发丝线交叉；切片设备已移除（字母对齐） |
 | 6 | HeroContentColumn | 中文简介 + `播放皮肤预览`（打开 3D 转台覆盖层）；`.content-box` 绝对定位 23%/29%/43%，≥1200px 15% |
 | 7 | EkkoStage | three.js 渲染 `ekko-td.glb`（3.5 MB，5 部件 / 12,820 三角面）；三灯（品红主光 / 青光补光 / 金色轮廓）；指针视差倾斜 lerp .06；滚动 dolly；拖拽旋转；阵容卡点击 **热替换 GLB** |
 | 8 | AbilitySection | 被动 + Q/W/E/R 五行，Font-B 大写 + 官方中文技能名；`<i>` 斜体英文原名；hover 行高亮品红；`<b>` 金色下划线 |

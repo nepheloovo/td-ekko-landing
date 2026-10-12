@@ -315,62 +315,30 @@ body.reel-open {
 .big-headline .lines .line { position: absolute; width: 1px; background: var(--ash); height: 77vw; }
 @media (min-width: 768px) { .big-headline .lines .line { height: 80%; } }
 
-.text-part { position: absolute; top: 0; left: 0; width: 100%; }
-.text-part.part-1 { position: relative; clip-path: polygon(0 0, 24.5% 0, 29.8% 100%, 0 100%); }
-.text-part.part-2 { clip-path: polygon(24.5% 0, 29.7% 0, 36.7% 100%, 29.7% 100%); }
-.text-part.part-3 { clip-path: polygon(29.7% 0, 72.8% 0, 63% 100%, 36.6% 100%); }
-.text-part.part-4 { clip-path: polygon(100% 0, 72.8% 0, 63% 100%, 100% 100%); }
-@media (min-width: 768px) {
-  .text-part.part-1 { clip-path: polygon(0 0, 20.5% 0, 29.8% 100%, 0 100%); }
-  .text-part.part-2 { clip-path: polygon(20.49% 0, 38.7% 0, 45.7% 100%, 29.7% 100%); }
-  .text-part.part-3 { clip-path: polygon(38.7% 0, 72.8% 0, 63% 100%, 45.6% 100%); }
-  .text-part.part-4 { clip-path: polygon(100% 0, 72.8% 0, 63% 100%, 100% 100%); }
-}
+/* The sliced-column device (.text-part / .part-N clip-paths plus their per-band
+   row offsets) was removed: its band boundaries and -68px offsets broke the
+   letterforms of this page's short Latin rows. The stack is rendered once. */
 .inner-text { position: relative; line-height: 1; }
-.text-row-1 { left: -2%; text-align: right; }
-.text-row-2 { left: 6%; }
-.text-row-3 { padding-left: 1.4em; }
+.text-row-1 { padding-left: 1.05em; }
+.text-row-2 { padding-left: 0; }
+.text-row-3 { padding-left: 1.75em; }
 .text-row-4 { padding-left: 2.5em; }
-@media (min-width: 768px) {
-  .text-row-1 { left: 0; padding-left: 1.05em; text-align: left; }
-  .text-row-2 { left: 0; }
-  .text-row-3 { padding-left: 1.75em; }
-}
-.part-2 .text-row-2 { top: -0.1em; }
-.part-2 .text-row-3 { top: 0; }
-.part-3 .text-row-1 { top: 0.1em; }
-.part-3 .text-row-4 { top: -0.3em; }
-.part-4 .text-row-1 { top: 0.2em; }
-.part-4 .text-row-3 { top: -0.15em; }
-.part-4 .text-row-4 { top: -0.35em; }
-@media (min-width: 768px) {
-  .part-2 .text-row-3 { top: -0.3em; }
-  .part-3 .text-row-3 { top: -0.2em; }
-}
-/* Mobile: the source's 20vw rows plus the 1.4em / 2.5em cascade indents overflow
-   a phone viewport (verified at 390x844: DAMAGE clipped). Step the size down and
-   flatten the indent ladder below md. */
 @media (max-width: 767.98px) {
-  .huge-text { font-size: 15vw; }
-  .text-row-1 { left: 0; padding-left: 0.15em; text-align: left; }
-  .text-row-2 { left: 0; }
+  .text-row-1 { padding-left: 0.15em; }
   .text-row-3 { padding-left: 0.5em; }
   .text-row-4 { padding-left: 0.85em; }
 }
-/* per-row colour so the sliced bands read as light refracting through glass */
+/* per-row colour so the stack reads as light falling through the page */
 .row-cjk {
   color: var(--hot);
   font-family: 'Noto Serif SC', 'Bodoni Moda', serif;
   font-weight: 900;
-  /* CJK glyphs fill the em box, so they read ~25% larger than a Latin cap-height
-     stack at the same font-size. 0.8em optically matches the Latin rows. */
   font-size: 0.8em;
 }
 .row-1 { color: #fff; }
 .row-2 { color: #f0dcff; }
 .row-3 { color: #d9b8ff; }
 .row-4 { color: #b993ff; }
-
 .content-box { position: relative; }
 @media (min-width: 768px) {
   .big-headline .content-box { position: absolute; width: 23%; top: 29%; left: 43%; }

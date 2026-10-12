@@ -9,12 +9,18 @@ const ROWS = [
 ];
 
 /**
- * The signature sliced-column headline, transplanted verbatim.
+ * The four-row word stack.
  *
- * The four-row word stack is rendered FOUR times as .text-part siblings; each
- * copy is clipped to a slanted vertical band by clip-path (the polygons are the
- * source's exact values), and each band nudges its rows by a different `top`
- * offset — so the type reads as sheared along invisible diagonal seams.
+ * This USED to be the reference site's signature sliced-column device: the same
+ * stack rendered four times, each copy clipped to a slanted band by clip-path
+ * with a different per-band `top` offset. That device was tuned for a
+ * 12-character Latin row; with this page's 4-6 character rows the band
+ * boundaries land inside individual letters and the offsets reach -68px at a
+ * 194px font size, so the glyphs read as broken rather than sheared. The stack
+ * is now rendered once and the letters are exactly aligned.
+ *
+ * What remains of the world: the cascading row indents, the per-row colour
+ * ladder, the three crossing hairlines, the starburst, and the particle trail.
  *
  * NOTE on the hairlines: the reference animated their `rotation` channel from
  * 80deg to data-torotation (0), yet the measured live transform was the CSS
@@ -24,22 +30,18 @@ const ROWS = [
 export function Hero({ onPlayPreview }: { onPlayPreview: () => void }) {
   return (
     <div className="waypoint page-header color-white px-0 pt-5 pb-3" id="archive">
-      <div className="big-headline" style={{ width: '100%' }}>
-        {[1, 2, 3, 4].map((part) => (
-          <div key={part} className={`text-part part-${part} huge-text`} aria-hidden={part > 1}>
-            {ROWS.map((row, i) => (
-              <span
-                key={row.text}
-                className={`d-block inner-text text-row-${i + 1} should-animate ${row.cls}`}
-                data-preset="opacity,y"
-                data-delay={row.delay.toFixed(2)}
-                data-dur="1.2"
-                data-fromy="34"
-              >
-                {row.text}
-              </span>
-            ))}
-          </div>
+      <div className="big-headline huge-text" style={{ width: '100%' }}>
+        {ROWS.map((row, i) => (
+          <span
+            key={row.text}
+            className={`d-block inner-text text-row-${i + 1} should-animate ${row.cls}`}
+            data-preset="opacity,y"
+            data-delay={row.delay.toFixed(2)}
+            data-dur="1.2"
+            data-fromy="34"
+          >
+            {row.text}
+          </span>
         ))}
 
         <div className="lines" aria-hidden="true">
