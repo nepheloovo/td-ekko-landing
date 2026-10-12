@@ -11,12 +11,18 @@ export function Nav() {
           <span className="font-M" style={{ fontSize: '0.5rem', letterSpacing: '0.22em', opacity: 0.72 }}>真实伤害 / TRUE DAMAGE</span>
         </a>
 
-        <div className="position-absolute r-0 mr-1 mr-md-2 mt-md-1" style={{ textAlign: 'right' }}>
+        <div
+          className="position-absolute r-0 mr-1 mr-md-2 mt-md-1"
+          // `top: 0` is load-bearing: absolutely positioned with top:auto this
+          // column took its static position, which put the first item above the
+          // viewport top (clipped, and therefore never IntersectionObserver-revealed).
+          style={{ textAlign: 'right', top: '2rem' }}
+        >
           {NAV_ITEMS.map((item, i) => (
             <div className="lh-1 h6" key={item.href}>
               <a
                 href={item.href}
-                className="nav-item d-md-inline-block enabled should-animate d-none"
+                className="nav-item d-md-inline-block enabled should-animate d-none tap"
                 data-delay={(0.4 + i * 0.05).toFixed(2)}
                 data-preset="opacity,y"
                 data-fromy="20"
@@ -27,7 +33,7 @@ export function Nav() {
             </div>
           ))}
           <div className="lh-1 h6" style={{ marginTop: '0.6em' }}>
-            <DistortedLink text="245019" href="#lineup" className="font-M" innerClassName="h6" />
+            <DistortedLink text="245019" href="#lineup" className="font-M tap" innerClassName="h6" />
           </div>
         </div>
       </div>

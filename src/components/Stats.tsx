@@ -36,7 +36,7 @@ export function Stats() {
               <span>{row.value}</span>
             </div>
           ))}
-          <p className="h6 font-M uppercase" style={{ marginTop: '1.6rem', opacity: 0.45, letterSpacing: '0.1em' }}>
+          <p className="h6 font-M uppercase" style={{ marginTop: '1.6rem', opacity: 0.5, letterSpacing: '0.1em' }}>
             数值来自本工作区 ekko-truedamage/ 工具包对 GLB 与 .skn 的逐字节校验结果
           </p>
         </div>

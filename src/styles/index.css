@@ -80,9 +80,11 @@ body.reel-open {
 @media (min-width: 1500px) { .container { max-width: 1360px; } }
 
 .row { display: flex; flex-wrap: wrap; margin-right: -15px; margin-left: -15px; }
-.col-4, .col-8, .col-sm-7, .col-md-4, .col-md-5, .col-md-6, .col-md-8, .col-11, .col-xl-8 {
+.col-4, .col-7, .col-8, .col-11, .col-12, .col-sm-7, .col-md-4, .col-md-5, .col-md-6, .col-md-8, .col-xl-8 {
   position: relative; width: 100%; padding-right: 15px; padding-left: 15px;
 }
+.col-7 { flex: 0 0 58.33333%; max-width: 58.33333%; }
+.col-12 { flex: 0 0 100%; max-width: 100%; }
 .col-4 { flex: 0 0 33.33333%; max-width: 33.33333%; }
 .col-8 { flex: 0 0 66.66667%; max-width: 66.66667%; }
 .col-11 { flex: 0 0 91.66667%; max-width: 91.66667%; }
@@ -125,9 +127,17 @@ body.reel-open {
 .r-0 { right: 0; }
 .no-wrap { white-space: nowrap; }
 @media (min-width: 768px) {
+  /* These four were missing from the compat layer. Their absence silently killed
+     real functionality: `d-md-inline-block` left the whole nav at display:none
+     (so its reveal observer never fired and the links never appeared), and
+     `d-md-inline` hid every ability's flavour line at all widths. */
   .d-md-flex { display: flex; }
   .d-md-block { display: block; }
+  .d-md-inline { display: inline; }
+  .d-md-inline-block { display: inline-block; }
   .d-md-none { display: none; }
+  .flex-md-column { flex-direction: column; }
+  .justify-content-md-end { justify-content: flex-end; }
   .flex-md-row { flex-direction: row; }
   .justify-content-md-between { justify-content: space-between; }
   .justify-content-md-start { justify-content: flex-start; }
@@ -264,6 +274,11 @@ body.reel-open {
   background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3'/></filter><rect width='180' height='180' filter='url(%23n)'/></svg>");
 }
 
+/* Hit-area utility. WCAG 2.2 SC 2.5.8 (AA) wants >=24x24 CSS px for pointer
+   targets; several inline links measured 20-23px tall. Padding grows the hit
+   box without changing the visual size of the text. */
+.tap { display: inline-block; padding: 0.4em 0.22em; }
+
 /* ================================ TRACING ================================= */
 .tracing-layer { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 120; pointer-events: none; }
 
@@ -392,11 +407,21 @@ body.reel-open {
 }
 .ability-row:hover { color: var(--magenta); transform: translateX(0.08em); }
 .ability-row i { font-style: italic; color: #cbb6ff; }
-.ability-row b { font-weight: 900; color: var(--gold); position: relative; }
-.ability-row b::after {
-  content: ''; position: absolute; top: 100%; left: 0; width: 100%; height: 1px;
-  background-color: currentColor; opacity: 0.5;
+.ability-row { flex-wrap: wrap; }
+/* The flavour line is tertiary information: it gets its own row, a small size and
+   a muted colour. It was previously rendered at the row's full 2.2rem in gold —
+   the loudest treatment on the page for the least important content, which
+   inverts the hierarchy. */
+.ability-row b {
+  flex-basis: 100%;
+  text-align: center;
+  font-weight: 400;
+  font-size: 0.72rem;
+  letter-spacing: 0.02em;
+  color: var(--ash);
+  position: relative;
 }
+.ability-row b::after { content: none; }
 .ability-key { font-family: 'Space Mono', monospace; font-size: 0.72rem; color: var(--cyan); letter-spacing: 0.1em; }
 .services .line { height: 7vw; width: 2px; }
 .services .line::after {

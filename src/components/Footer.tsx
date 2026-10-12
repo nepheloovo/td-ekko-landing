@@ -14,7 +14,7 @@ export function Footer({ onPlayPreview }: { onPlayPreview: () => void }) {
               本页为粉丝概念设计，非官方，非商用
             </h5>
             <div className="footer-rainbow-rule w-100" style={{ marginBottom: '1.4rem' }} />
-            <p className="h6 font-M uppercase" style={{ opacity: 0.45, letterSpacing: '0.12em' }}>
+            <p className="h6 font-M uppercase" style={{ opacity: 0.5, letterSpacing: '0.12em' }}>
               3D 资产：CommunityDragon 镜像资源 · 自建 GLB 管线
             </p>
           </div>

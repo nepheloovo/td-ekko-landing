@@ -40,7 +40,7 @@ export function HeaderMarquee({ scrollEl }: { scrollEl: React.RefObject<HTMLElem
 
   return (
     <div ref={node} className="position-fixed t-0 l-0 w-100" style={{ zIndex: 99998, opacity: op, transition: 'opacity .2s linear', pointerEvents: op < 0.15 ? 'none' : 'auto' }}>
-      <a href="#lineup" style={{ textDecoration: 'none', color: 'inherit', display: 'block' }}>
+      <a href="#lineup" style={{ textDecoration: 'none', color: 'inherit', display: 'block', padding: '3px 0' }}>
         <MarqueeLoop
           items={MARQUEE_TOP}
           className="header-marquee h6 color-white"

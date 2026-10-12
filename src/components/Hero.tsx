@@ -60,7 +60,7 @@ export function Hero({ onPlayPreview }: { onPlayPreview: () => void }) {
             <h1 className="font-C" style={{ fontSize: '1rem', textTransform: 'uppercase', lineHeight: 0.95, margin: '0.6rem 0 0.6rem', fontWeight: 500 }}>
               一个把四秒倒带当成武器的少年
             </h1>
-            <p className="font-C" style={{ fontSize: '1rem', lineHeight: 1.25, opacity: 0.55, margin: 0 }}>
+            <p className="font-C" style={{ fontSize: '1rem', lineHeight: 1.25, opacity: 0.62, margin: 0 }}>
               佐恩的霓虹、黑胶质感的低音，和一台永远比对手快半拍的时间装置。这一页用真实游戏模型与自写 WebGL 着色器把它重建出来。
             </p>
 
@@ -69,7 +69,7 @@ export function Hero({ onPlayPreview }: { onPlayPreview: () => void }) {
                 text="PLAY 3D 转台"
                 href="#"
                 onClick={onPlayPreview}
-                className="h5 uppercase font-B lh-1"
+                className="h5 uppercase font-B lh-1 tap"
                 innerClassName="h5"
               />
             </div>

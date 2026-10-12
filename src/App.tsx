@@ -24,6 +24,7 @@ export default function App() {
   const content = useRef<HTMLDivElement>(null);
   const backdrop = useRef<BackdropApi | null>(null);
   const stageScroll = useRef<((p: number) => void) | null>(null);
+  const chrome = useRef<HTMLDivElement>(null);
   const [booted, setBooted] = useState(false);
   const [glb, setGlb] = useState(() => asset('assets/ekko-td.glb'));
   const [reelTitle, setReelTitle] = useState('真实伤害 · True Damage Ekko');
@@ -36,6 +37,10 @@ export default function App() {
 
   useSmoothScroll(wrapper, content, onProgress);
   useWaypointReveal(content, booted);
+  // The fixed chrome (nav + marquee) sits OUTSIDE the scroll content, so it needs
+  // its own reveal root — without this its .should-animate items stay at
+  // opacity:0 forever and the navigation is invisible.
+  useWaypointReveal(chrome, booted);
 
   const onBackdropReady = useCallback((api: BackdropApi) => {
     backdrop.current = api;
@@ -63,8 +68,10 @@ export default function App() {
     <>
       <SvgFilters />
       <Backdrop onReady={onBackdropReady} />
-      <HeaderMarquee scrollEl={wrapper} />
-      <Nav />
+      <div ref={chrome}>
+        <HeaderMarquee scrollEl={wrapper} />
+        <Nav />
+      </div>
 
       {!booted && <Loader sources={PRELOAD} onFinished={() => setBooted(true)} />}
 
